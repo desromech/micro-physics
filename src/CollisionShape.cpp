@@ -36,7 +36,7 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         return secondTransform.transformPosition(secondShape->localSupportFunction(secondTransform.inverseTransformNormal(D)));
     };
 
-    auto gjkSimplex = computeGJKSimplexFor(firstSupportFunction, secondSupportFunction, separatingAxisHint);
+    auto gjkSimplex = computeGJKSimplexFor(secondSupportFunction, firstSupportFunction, separatingAxisHint);
     auto closestPointToOrigin = gjkSimplex.computeClosesPointToOrigin();
     auto totalMargin = margin + secondShape->margin;
     auto shapeDistance = closestPointToOrigin.length();
@@ -44,7 +44,6 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         return std::vector<ContactPoint>{};
 
     if (shapeDistance >= ShallowPenetrationThreshold) {
-        printf("Shallow Convex Convex contact.\n");
         ContactPoint shallowContact;
         shallowContact.normal = closestPointToOrigin.normalized();
         shallowContact.requiredSeparation = totalMargin;
@@ -52,6 +51,7 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         shallowContact.secondPoint = gjkSimplex.computeClosesPointToOriginInSecondObject();
         shallowContact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
         shallowContact.computeWorldContactPointAndDistances();
+        printf("Shallow Convex Convex contact. Normal: %f %f %f\n", shallowContact.normal.x, shallowContact.normal.y, shallowContact.normal.z);
         return std::vector{shallowContact};
     };
 

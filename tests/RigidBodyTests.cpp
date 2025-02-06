@@ -57,7 +57,7 @@ void testFallingBoxWithFloor()
     floorCollisionObject->collisionShape = floorCollisionShape;
     physicsWorld->addCollisionObject(floorCollisionObject);
 
-    auto floorBBox = floorCollisionObject->getWorldBoundingBox();
+    //auto floorBBox = floorCollisionObject->getWorldBoundingBox();
 
     // Create the fallling box
     auto boxCollisionShape = std::make_shared<BoxCollisionShape> ();
@@ -70,7 +70,48 @@ void testFallingBoxWithFloor()
     rigidBody->setPosition(Vector3(0, 2, 0));
     physicsWorld->addCollisionObject(rigidBody);
 
-    auto rigidBodyBBox = rigidBody->getWorldBoundingBox();
+    //auto rigidBodyBBox = rigidBody->getWorldBoundingBox();
+
+    for(int i = 0; i < 100; ++i)
+    {
+        physicsWorld->updateTimestep(UpdateTimestep);
+        printf("%f %f %f\n", rigidBody->getPosition().x, rigidBody->getPosition().y, rigidBody->getPosition().z);
+    };
+
+    TestAssert(rigidBody->getPosition().x == 0);
+    TestAssert(rigidBody->getPosition().y >= 0);
+    TestAssert(rigidBody->getPosition().z == 0);
+}
+
+void testFallingBoxWithCompoundFloor()
+{
+    auto physicsWorld = std::make_shared<PhysicsWorld> ();
+
+    // Create the floor
+    auto floorCollisionShape = std::make_shared<BoxCollisionShape> ();
+    floorCollisionShape->setHalfExtent(Vector3(5, 0.25, 5));
+    
+    auto floorCompoundShape = std::make_shared<CompoundCollisionShape> ();
+    floorCompoundShape->addElement(TRSTransform(), floorCollisionShape);
+
+    auto floorCollisionObject = std::make_shared<CollisionObject> ();
+    floorCollisionObject->collisionShape = floorCompoundShape;
+    physicsWorld->addCollisionObject(floorCollisionObject);
+
+    //auto floorBBox = floorCollisionObject->getWorldBoundingBox();
+
+    // Create the fallling box
+    auto boxCollisionShape = std::make_shared<BoxCollisionShape> ();
+    boxCollisionShape->setHalfExtent(Vector3(0.5, 0.5, 0.5));
+
+    auto rigidBody = std::make_shared<RigidBody> ();
+    rigidBody->collisionShape = boxCollisionShape;
+    rigidBody->setMass(1.0);
+    rigidBody->computeMassDistribution();
+    rigidBody->setPosition(Vector3(0, 2, 0));
+    physicsWorld->addCollisionObject(rigidBody);
+
+    //auto rigidBodyBBox = rigidBody->getWorldBoundingBox();
 
     for(int i = 0; i < 100; ++i)
     {
@@ -85,8 +126,9 @@ void testFallingBoxWithFloor()
 
 int main()
 {
-    testEmptyWorld();
-    testFallingBox();
+    //testEmptyWorld();
+    //testFallingBox();
     testFallingBoxWithFloor();
+    //testFallingBoxWithCompoundFloor();
     return 0;
 }
