@@ -40,7 +40,7 @@ public:
 
     virtual float getRestitutionCoefficient() const
     {
-        return 0.0;
+        return 0.2;
     }
 
     virtual Vector3 computeVelocityAtRelativePoint(const Vector3 &relativePoint)
@@ -57,6 +57,11 @@ public:
     {
         (void)relativePosition;
         applyLinearImpulse(impulse);
+    }
+
+    virtual void applyMovePerMass(Vector3 movement)
+    {
+        (void)movement;
     }
 
     virtual bool needsCollisionDetection() const
@@ -98,6 +103,17 @@ public:
     virtual AABox3 getWorldBoundingBox() const
     {
         return collisionShape->localBoundingBoxWithMargin.transformedWith(transform);
+    }
+
+    virtual Vector3 getLinearVelocity() const
+    {
+        return Vector3::zeros();
+    }
+
+
+    virtual Vector3 getAngularVelocity() const
+    {
+        return Vector3::zeros();
     }
 
     CollisionShapePtr collisionShape;

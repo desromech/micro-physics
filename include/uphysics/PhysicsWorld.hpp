@@ -24,7 +24,9 @@ public:
     void detectNarrowPhaseCollisionOf(const CollisionObjectPtr &firstCollisionObject, const CollisionObjectPtr &secondCollisionObject);
     void resolveContactManifoldsCollisionsAndConstraints(const std::vector<ContactManifoldPtr> &manifolds);
     void solveCollisionContactResponseList(std::vector<ContactPoint> &contactList);
+    void solveCollisionContactResponse(ContactPoint &contact);
     void solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList);
+    void solveCollisionContactConstraint(ContactPoint &contact);
 
     void setGravity(const Vector3 &newGravity)
     {

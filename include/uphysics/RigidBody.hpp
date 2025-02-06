@@ -18,6 +18,13 @@ public:
         mass = newMass;
         if(newMass == 0)
             inverseMass = 0;
+        else
+            inverseMass = 1.0f / mass;
+    }
+
+    virtual bool hasCollisionResponse() const
+    {
+        return inverseMass != 0;
     }
 
     void computeMassDistribution()
@@ -39,6 +46,11 @@ public:
         return restitutionCoefficient;
     }
 
+    virtual Vector3 computeVelocityAtRelativePoint(const Vector3 &relativePoint)
+    {
+        return linearVelocity;
+    }
+
     virtual bool needsCollisionDetection() const
     {
         return inverseMass != 0.0f;
@@ -53,6 +65,23 @@ public:
     {
         (void)relativePosition;
         applyLinearImpulse(impulse);
+    }
+
+    virtual void applyMovePerMass(Vector3 movement)
+    {
+        auto delta = movement * inverseMass;
+        setPosition(getPosition() + delta);
+    }
+
+    virtual Vector3 getLinearVelocity() const
+    {
+        return linearVelocity;
+    }
+
+
+    virtual Vector3 getAngularVelocity() const
+    {
+        return angularVelocity;
     }
 
 protected:

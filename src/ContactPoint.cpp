@@ -38,6 +38,11 @@ float ContactPoint::separationSpeed() const
     return (firstCollisionObject->computeVelocityAtRelativePoint(relativeFirstPoint()) -
         secondCollisionObject->computeVelocityAtRelativePoint(relativeSecondPoint())).dot(normal);
 }
+
+float ContactPoint::closingSpeed() const
+{
+    return -separationSpeed();
+}
 void ContactPoint::update()
 {
     computeWorldVersionWithTransforms(firstCollisionObject->getTransform(),  secondCollisionObject->getTransform());

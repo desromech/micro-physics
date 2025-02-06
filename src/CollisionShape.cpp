@@ -51,9 +51,14 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     };
 
     auto contact = samplePenetrationSupportContact(firstSupportFunction, secondSupportFunction, totalMargin, separatingAxisHint);
-    printf("Sample penetration.\n");
+    //printf("Sample penetration.\n");
     if(!contact.isValid)
         return std::vector<ContactPoint>{};
+
+    contact.requiredSeparation = totalMargin;
+    contact.penetrationDistance += totalMargin;
+    contact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
+    contact.computeWorldContactPointAndDistances();
     return std::vector{contact};
 }
 

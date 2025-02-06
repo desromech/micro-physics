@@ -22,7 +22,7 @@ void PhysicsWorld::detectAndResolveCollisionsWithDeltaTime(float deltaTimestep)
     if (broadphaseResult.empty())
         return;
 
-    printf("Broadphase size %zu\n", broadphaseResult.size());
+    //printf("Broadphase size %zu\n", broadphaseResult.size());
     computeNarrowPhaseContactsFromBroadphasePairs(broadphaseResult);
     resolveContactManifoldsCollisionsAndConstraints(contactManifoldCache.manifolds);
 }
@@ -85,24 +85,77 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
         {
             contactList.insert(contactList.end(), manifold->points.begin(), manifold->points.begin() + manifold->size);
         }
+    }
 
-        size_t rounds = 2;
-        for(size_t i = 0; i < rounds*contactList.size(); ++i )
-        {
-            solveCollisionContactResponseList(contactList);
-            solveCollisionContactConstraintList(contactList);
-        }
+    size_t rounds = 2;
+    for(size_t i = 0; i < rounds*contactList.size(); ++i )
+    {
+        solveCollisionContactResponseList(contactList);
+        solveCollisionContactConstraintList(contactList);
     }
 }
 
+
 void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &contactList)
 {
+    for(auto &contact : contactList)
+    {
+        contact.update();
+        solveCollisionContactResponse(contact);
+    }
+}
 
+void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
+{
+    // Are they already separating?
+    auto separatingSpeed = contact.separationSpeed();
+    if(separatingSpeed > 0)
+        return;
+
+    auto restitution = sqrt(contact.firstCollisionObject->getRestitutionCoefficient()*contact.secondCollisionObject->getRestitutionCoefficient());
+
+    auto newSeparatingSpeed = -separatingSpeed*restitution;
+    auto deltaSpeed = newSeparatingSpeed - separatingSpeed;
+    float inverseInertia = contact.inverseLinearInertia();
+    if(inverseInertia <= 0)
+        return;
+
+    float impulse = deltaSpeed / inverseInertia;
+    Vector3 impulsePerIMass = contact.normal * impulse;
+
+    contact.firstCollisionObject->applyLinearImpulse(impulsePerIMass);
+    contact.secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
+
+    //printf("separationSpeed %f\n", separatingSpeed);
+    //printf("restitution %f\n", restitution);
+    //printf("inverseInertia %f\n", inverseInertia);
+    //printf("impulse %f\n", impulse);
 }
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
 {
+    for(auto &contact : contactList)
+    {
+        contact.update();
+        solveCollisionContactConstraint(contact);
+    }
+}
 
+void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
+{
+    auto penetrationDistance = contact.penetrationDistance;
+    if (penetrationDistance <= 0)
+        return;
+
+    auto totalInverseMass = contact.inverseLinearInertia();
+    if(totalInverseMass <= 0)
+        return;
+
+    auto movePerMass = contact.normal * (penetrationDistance / totalInverseMass);
+    contact.firstCollisionObject->applyMovePerMass(movePerMass);
+    contact.secondCollisionObject->applyMovePerMass(-movePerMass);
+
+    printf("penetrationDistance %f\n", penetrationDistance);
 }
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)

@@ -557,6 +557,7 @@ ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSu
 
     auto distance = distanceAndNormals.penetrationDistance;
     auto normal = distanceAndNormals.normal;
+    
     float extraSeparation = 0.5;
     float distanceWithMargin = extraSeparation + distance + margin;
     auto displacement = normal * distanceWithMargin;
@@ -573,11 +574,13 @@ ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSu
     auto secondClosestPoint = gjkSimplex.computeClosesPointToOriginInSecondObject();
 
     ContactPoint result;
+    result.requiredSeparation = margin;
     result.penetrationDistance = correctedPenetrationDistance;
     result.normal = normal;
     result.firstPoint = firstClosestPoint;
     result.secondPoint = secondClosestPoint;
     result.isValid = true;
+    //result.computeWorldContactPointAndDistances();
     return result;
 
 }
