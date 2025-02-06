@@ -27,7 +27,7 @@ void testFallingBox()
     auto physicsWorld = std::make_shared<PhysicsWorld> ();
 
     auto boxCollisionShape = std::make_shared<BoxCollisionShape> ();
-    boxCollisionShape->halfExtent = 0.5;
+    boxCollisionShape->setHalfExtent(0.5);
 
     auto rigidBody = std::make_shared<RigidBody> ();
     rigidBody->collisionShape = boxCollisionShape;
@@ -52,14 +52,16 @@ void testFallingBoxWithFloor()
 
     // Create the floor
     auto floorCollisionShape = std::make_shared<BoxCollisionShape> ();
-    floorCollisionShape->halfExtent = Vector3(5, 0.25, 5);
+    floorCollisionShape->setHalfExtent(Vector3(5, 0.25, 5));
     auto floorCollisionObject = std::make_shared<CollisionObject> ();
     floorCollisionObject->collisionShape = floorCollisionShape;
     physicsWorld->addCollisionObject(floorCollisionObject);
 
+    auto floorBBox = floorCollisionObject->getWorldBoundingBox();
+
     // Create the fallling box
     auto boxCollisionShape = std::make_shared<BoxCollisionShape> ();
-    boxCollisionShape->halfExtent = 0.5;
+    boxCollisionShape->setHalfExtent(Vector3(0.5, 0.5, 0.5));
 
     auto rigidBody = std::make_shared<RigidBody> ();
     rigidBody->collisionShape = boxCollisionShape;
@@ -67,6 +69,8 @@ void testFallingBoxWithFloor()
     rigidBody->computeMassDistribution();
     rigidBody->setPosition(Vector3(0, 2, 0));
     physicsWorld->addCollisionObject(rigidBody);
+
+    auto rigidBodyBBox = rigidBody->getWorldBoundingBox();
 
     for(int i = 0; i < 100; ++i)
     {

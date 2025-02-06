@@ -3,6 +3,7 @@
 
 
 #include "CollisionObject.hpp"
+#include "ContactManifold.hpp"
 
 namespace UPhysics
 {
@@ -18,6 +19,12 @@ public:
     void sendToSleepRestingObjects(float deltaTimestep);
     void updateTimestep(float deltaTimestep);
 
+    std::vector<std::pair<CollisionObjectPtr, CollisionObjectPtr> > computeBroadphasePairCandidates();
+    void computeNarrowPhaseContactsFromBroadphasePairs(const std::vector<std::pair<CollisionObjectPtr, CollisionObjectPtr> > &broadphasePairs );
+    void detectNarrowPhaseCollisionOf(const CollisionObjectPtr &firstCollisionObject, const CollisionObjectPtr &secondCollisionObject);
+    void resolveContactManifoldsCollisionsAndConstraints(const std::vector<ContactManifoldPtr> &manifolds);
+    void solveCollisionContactResponseList(std::vector<ContactPoint> &contactList);
+    void solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList);
 
     void setGravity(const Vector3 &newGravity)
     {
@@ -54,6 +61,7 @@ public:
 private:
     Vector3 gravity = Vector3(0, -9.8, 0);
     std::vector<CollisionObjectPtr> collisionObjects;
+    ContactManifoldCache contactManifoldCache;
 };
 } // End of namespace UPhysics
 

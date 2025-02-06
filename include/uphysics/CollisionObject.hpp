@@ -8,6 +8,8 @@ namespace UPhysics
 {
 
 typedef std::shared_ptr<class CollisionObject> CollisionObjectPtr;
+typedef std::shared_ptr<class CollisionShape> CollisionShapePtr;
+
 class PhysicsWorld;
 
 class CollisionObject
@@ -57,6 +59,11 @@ public:
         applyLinearImpulse(impulse);
     }
 
+    virtual bool needsCollisionDetection() const
+    {
+        return false;
+    }
+
     uint32_t getID()
     {
         return monotonicID;
@@ -86,6 +93,11 @@ public:
 
     virtual void transformChanged()
     {
+    }
+
+    virtual AABox3 getWorldBoundingBox() const
+    {
+        return collisionShape->localBoundingBoxWithMargin.transformedWith(transform);
     }
 
     CollisionShapePtr collisionShape;

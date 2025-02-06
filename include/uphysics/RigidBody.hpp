@@ -39,6 +39,10 @@ public:
         return restitutionCoefficient;
     }
 
+    virtual bool needsCollisionDetection() const
+    {
+        return inverseMass != 0.0f;
+    }
 
     virtual void applyLinearImpulse(Vector3 impulse)
     {

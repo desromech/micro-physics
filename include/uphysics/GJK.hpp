@@ -430,7 +430,7 @@ public:
 };
 
 template<typename FirstSupportFunction, typename SecondSupportFunction>
-GJKVoronoiSimplexSolver computeGJKSimpleFor(FirstSupportFunction firstObjectSupport, SecondSupportFunction secondObjectSupport, Vector3 startingDirectionHint = Vector3(1, 0, 0))
+GJKVoronoiSimplexSolver computeGJKSimplexFor(FirstSupportFunction firstObjectSupport, SecondSupportFunction secondObjectSupport, Vector3 startingDirectionHint = Vector3(1, 0, 0))
 {
     static const int MaxNumberOfIterations = 32;
     static const float Epsilon = 1e-5;
@@ -564,7 +564,7 @@ ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSu
         return firstSupport(d) + displacement;
     };
 
-    GJKVoronoiSimplexSolver gjkSimplex = computeGJKSimpleFor(displacedFirstSupport, secondSupport, -normal);
+    GJKVoronoiSimplexSolver gjkSimplex = computeGJKSimplexFor(displacedFirstSupport, secondSupport, -normal);
     auto separationVector = gjkSimplex.computeClosesPointToOrigin();
     auto separationVectorLength = separationVector.length();
 

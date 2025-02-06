@@ -23,6 +23,7 @@ void RigidBody::integrateMovement(float delta)
 
     netForce = Vector3::zeros();
     netTorque = Vector3::zeros();
+    transformChanged();
 }
 
 } // End of namespace UPhysics

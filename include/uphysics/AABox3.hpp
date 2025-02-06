@@ -78,7 +78,7 @@ struct AABox3
         return
             otherBox.max.x < min.x || max.x < otherBox.min.x ||
             otherBox.max.y < min.y || max.y < otherBox.min.y ||   
-            otherBox.max.z < min.z || max.y < otherBox.min.z;
+            otherBox.max.z < min.z || max.z < otherBox.min.z;
     }
 
     bool hasIntersectionWithBox(const AABox3 &otherBox) const
