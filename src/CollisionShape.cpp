@@ -15,6 +15,11 @@ std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPoints
     return std::vector<ContactPoint>{};
 }
 
+std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+{
+    return std::vector<ContactPoint>{};
+}
+
 std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
@@ -62,11 +67,40 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     return std::vector{contact};
 }
 
+std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+{
+    return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
+}
+
 void CompoundCollisionShape::addElement(const TRSTransform &transform, CollisionShapePtr shape)
 {
     CompoundShapeElement element;
     element.transform = transform;
     element.shape = shape;
     elements.push_back(element);
+}
+
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+{
+    return secondShape->detectAndComputeCollisionContactPointsWithCompoundShape(secondTransform, std::static_pointer_cast<CompoundCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
+}
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+{
+    printf("Compound-Convex\n");
+    std::vector<ContactPoint> contactPoints;
+    for(auto &element : elements)
+    {
+        auto elementContactPoints = element.shape->detectAndComputeCollisionContactPointsWithConvexShapeAt(firstTransform, secondShape, secondTransform, separatingAxisHint);
+        if(elementContactPoints.empty())
+            continue;
+        for(auto &contact : elementContactPoints)
+            contactPoints.push_back(contact);
+    }
+    return contactPoints;
+}
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+{
+    printf("TODO: Compund-Compund\n");
+    return std::vector<ContactPoint> {};
 }
 } // End of namespace UPhysics

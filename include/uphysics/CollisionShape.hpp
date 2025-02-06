@@ -12,6 +12,7 @@ namespace UPhysics
 
 typedef std::shared_ptr<class CollisionShape> CollisionShapePtr;
 typedef std::shared_ptr<class ConvexCollisionShape> ConvexCollisionShapePtr;
+typedef std::shared_ptr<class CompoundCollisionShape> CompoundCollisionShapePtr;
 
 class CollisionShape : public std::enable_shared_from_this<CollisionShape>
 {
@@ -23,6 +24,7 @@ public:
 
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
 
     float margin = 0.01f;
     AABox3 localBoundingBox;
@@ -44,6 +46,8 @@ public:
 
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    
 };
 
 class BoxCollisionShape : public ConvexCollisionShape
@@ -135,6 +139,10 @@ class CompoundCollisionShape : public CollisionShape
 {
 public:
     void addElement(const TRSTransform &transform, CollisionShapePtr shape);
+
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
 
 private:
     std::vector<CompoundShapeElement> elements;

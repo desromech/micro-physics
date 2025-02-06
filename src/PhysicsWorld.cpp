@@ -41,8 +41,8 @@ void PhysicsWorld::detectNarrowPhaseCollisionOf(const CollisionObjectPtr &firstC
     auto firstShape = firstCollisionObject->collisionShape;
     auto firstTransform = firstCollisionObject->getTransform();
 
-    auto secondShape = firstCollisionObject->collisionShape;
-    auto secondTransform = firstCollisionObject->getTransform();
+    auto secondShape = secondCollisionObject->collisionShape;
+    auto secondTransform = secondCollisionObject->getTransform();
 
     auto separatingAxisHint = contactManifoldCache.lastSeparatingAxisFor(firstCollisionObject, secondCollisionObject);
 
@@ -126,10 +126,10 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
     contact.firstCollisionObject->applyLinearImpulse(impulsePerIMass);
     contact.secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
 
-    //printf("separationSpeed %f\n", separatingSpeed);
-    //printf("restitution %f\n", restitution);
-    //printf("inverseInertia %f\n", inverseInertia);
-    //printf("impulse %f\n", impulse);
+    printf("separationSpeed %f\n", separatingSpeed);
+    printf("restitution %f\n", restitution);
+    printf("inverseInertia %f\n", inverseInertia);
+    printf("impulse %f\n", impulse);
 }
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
