@@ -8,11 +8,18 @@ namespace UPhysics
 {
 
 typedef std::shared_ptr<class CollisionObject> CollisionObjectPtr;
+class PhysicsWorld;
 
 class CollisionObject
 {
 public:
     CollisionObject();
+    virtual ~CollisionObject();
+
+    virtual void integrateMovement(float delta)
+    {
+        // By default do nothing.
+    }
 
     virtual bool hasCollisionResponse() const
     {
@@ -29,9 +36,25 @@ public:
         return 0.0;
     }
 
+    virtual float getRestitutionCoefficient() const
+    {
+        return 0.0;
+    }
+
     virtual Vector3 computeVelocityAtRelativePoint(const Vector3 &relativePoint)
     {
         return Vector3::zeros();
+    }
+
+    virtual void applyLinearImpulse(Vector3 impulse)
+    {
+        (void)impulse;
+    }
+
+    virtual void applyImpulseAtRelativePosition(Vector3 impulse, Vector3 relativePosition)
+    {
+        (void)relativePosition;
+        applyLinearImpulse(impulse);
     }
 
     uint32_t getID()
@@ -39,9 +62,37 @@ public:
         return monotonicID;
     }
 
-    TRSTransform transform;
+    const Vector3 &getPosition() const
+    {
+        return transform.translation;
+    }
+
+    void setPosition(const Vector3 &newPosition)
+    {
+        transform.translation = newPosition;
+        transformChanged();
+    }
+
+    const TRSTransform &getTransform() const
+    {
+        return transform;
+    }
+
+    void setTransform(const TRSTransform &newTransform)
+    {
+        transform = newTransform;
+        transformChanged();
+    }
+
+    virtual void transformChanged()
+    {
+    }
+
     CollisionShapePtr collisionShape;
-private:
+    PhysicsWorld *ownerWorld = nullptr;
+
+protected:
+    TRSTransform transform;
     uint32_t monotonicID;
 
 };

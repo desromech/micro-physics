@@ -50,12 +50,12 @@ namespace UPhysics
 
         Vector3 relativeFirstPoint() const
         {
-            return firstPoint - firstCollisionObject->transform.translation;
+            return firstPoint - firstCollisionObject->getPosition();
         }
 
         Vector3 relativeSecondPoint() const
         {
-            return secondPoint - secondCollisionObject->transform.translation;
+            return secondPoint - secondCollisionObject->getPosition();
         }
 
         float separationSpeed() const
@@ -71,7 +71,7 @@ namespace UPhysics
 
         void update()
         {
-            computeWorldVersionWithTransforms(firstCollisionObject->transform,  secondCollisionObject->transform);
+            computeWorldVersionWithTransforms(firstCollisionObject->getTransform(),  secondCollisionObject->getTransform());
         }
 
         void computeLocalVersionsWithTransforms(const TRSTransform &firstTransform, const TRSTransform &secondTransform)

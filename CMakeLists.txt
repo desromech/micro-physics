@@ -36,8 +36,6 @@ endif()
 set(EXECUTABLE_OUTPUT_PATH "${MicroPhysics_BINARY_DIR}/dist")
 set(LIBRARY_OUTPUT_PATH "${MicroPhysics_BINARY_DIR}/dist")
 
-include_directories("${SDL2_INCLUDE_DIR}")
-
 # Add the current directory.
 include_directories(
 .

@@ -10,4 +10,8 @@ CollisionObject::CollisionObject()
     monotonicID = monotonicIDCounter.fetch_add(1);
 }
 
+CollisionObject::~CollisionObject()
+{
+}
+
 } // End of namespace UPhysics
