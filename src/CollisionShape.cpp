@@ -62,4 +62,11 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     return std::vector{contact};
 }
 
+void CompoundCollisionShape::addElement(const TRSTransform &transform, CollisionShapePtr shape)
+{
+    CompoundShapeElement element;
+    element.transform = transform;
+    element.shape = shape;
+    elements.push_back(element);
+}
 } // End of namespace UPhysics

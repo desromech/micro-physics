@@ -118,6 +118,28 @@ public:
     std::vector<Vector3> corners;
 };
 
+class HeightfieldCollisionShape : public CollisionShape
+{
+public:
+
+};
+
+class CompoundShapeElement
+{
+public:
+    TRSTransform transform;
+    CollisionShapePtr shape;
+};
+
+class CompoundCollisionShape : public CollisionShape
+{
+public:
+    void addElement(const TRSTransform &transform, CollisionShapePtr shape);
+
+private:
+    std::vector<CompoundShapeElement> elements;
+};
+
 }; // End of namespace UPhysics
 
 #endif //UPHYSICS_COLLISION_SHAPE_HPP
