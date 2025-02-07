@@ -22,7 +22,7 @@ std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPoints
 
 std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
-    return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, -separatingAxisHint);
+    return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
 }
 
 std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
@@ -60,6 +60,8 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     if(!contact.isValid)
         return std::vector<ContactPoint>{};
 
+    contact.requiredSeparation = totalMargin;
+    contact.penetrationDistance += totalMargin;
     contact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
     contact.computeWorldContactPointAndDistances();
     return std::vector{contact};
