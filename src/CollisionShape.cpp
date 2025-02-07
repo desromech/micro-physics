@@ -93,7 +93,6 @@ std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionConta
 }
 std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
-    printf("Compound-Convex\n");
     std::vector<ContactPoint> contactPoints;
     for(auto &element : elements)
     {

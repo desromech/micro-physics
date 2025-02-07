@@ -73,20 +73,31 @@ public:
         setPosition(getPosition() + delta);
     }
 
-    virtual Vector3 getLinearVelocity() const
+    virtual Vector3 getLinearVelocity() const override
     {
         return linearVelocity;
     }
 
 
-    virtual Vector3 getAngularVelocity() const
+    virtual Vector3 getAngularVelocity() const override
     {
         return angularVelocity;
+    }
+
+    void setLinearEngineAcceleration(const Vector3 &newLinearEngineAcceleration)
+    {
+        linearEngineAcceleration = newLinearEngineAcceleration;
+    }
+
+    const Vector3 &getLinearEngineAcceleration()
+    {
+        return linearEngineAcceleration;
     }
 
 protected:
     float restitutionCoefficient = 0.2;
 
+    Vector3 linearEngineAcceleration = Vector3::zeros();
     Vector3 linearVelocity = Vector3::zeros();
     Vector3 linearAcceleration = Vector3::zeros();
     float linearVelocityDamping = 0.8;
