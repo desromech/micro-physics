@@ -57,11 +57,13 @@ void ContactPoint::computeLocalVersionsWithTransforms(const TRSTransform &firstT
     assert(!localFirstNormal.hasNaN());
     assert(!localSecondNormal.hasNaN());
 }
+
 void ContactPoint::computeWorldVersionWithTransforms(const TRSTransform &firstTransform, const TRSTransform &secondTransform)
 {
     firstPoint = firstTransform.transformPosition(localFirstPoint);
     secondPoint = firstTransform.transformPosition(localSecondPoint);
-    normal = firstTransform.transformNormal(secondTransform.transformNormal(localFirstNormal));
+    //normal = firstTransform.transformNormal(secondTransform.transformNormal(localFirstNormal));
+    normal = secondTransform.transformNormal(firstTransform.transformNormal(localFirstNormal));
     assert(!firstPoint.hasNaN());
     assert(!secondPoint.hasNaN());
     assert(!normal.hasNaN());

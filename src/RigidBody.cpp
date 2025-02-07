@@ -16,9 +16,10 @@ void RigidBody::integrateMovement(float delta)
     if(!ownerWorld)
         return;
 
-    linearAcceleration = netForce*inverseMass + ownerWorld->getGravity() - linearVelocity*linearVelocityDamping;
+    linearAcceleration = netForce*inverseMass + ownerWorld->getGravity();
     linearVelocity += linearAcceleration*delta;
-    
+    linearVelocity *= pow(linearVelocityDamping, delta);
+
     transform.translation += linearVelocity*delta;
 
     netForce = Vector3::zeros();

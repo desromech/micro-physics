@@ -401,22 +401,36 @@ public:
         invalidateCache();
     }
 
-    Vector3 computeClosesPointToOriginInFirstObject() const
+    Vector3 computeClosesPointToOriginInFirstObject()
     {
-        return 
-              firstPoints[0]*barycentricCoordinates[0]
-            + firstPoints[1]*barycentricCoordinates[1]
-            + firstPoints[2]*barycentricCoordinates[2]
-            + firstPoints[3]*barycentricCoordinates[3];
+        if(!hasComputedClosest)
+            computeClosesPointToOrigin();
+        
+        auto result = Vector3::zeros();
+        auto barycentricSum = 0.0f;
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            result += firstPoints[i]*barycentricCoordinates[i];
+            barycentricSum += barycentricCoordinates[i];
+        }
+
+        return result / Vector3(barycentricSum);
     }
 
-    Vector3 computeClosesPointToOriginInSecondObject() const
+    Vector3 computeClosesPointToOriginInSecondObject()
     {
-        return 
-              secondPoints[0]*barycentricCoordinates[0]
-            + secondPoints[1]*barycentricCoordinates[1]
-            + secondPoints[2]*barycentricCoordinates[2]
-            + secondPoints[3]*barycentricCoordinates[3];
+        if(!hasComputedClosest)
+            computeClosesPointToOrigin();
+        
+        auto result = Vector3::zeros();
+        auto barycentricSum = 0.0f;
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            result += secondPoints[i]*barycentricCoordinates[i];
+            barycentricSum += barycentricCoordinates[i];
+        }
+
+        return result / Vector3(barycentricSum);
     }
 
     size_t pointCount = 0;
@@ -434,6 +448,10 @@ GJKVoronoiSimplexSolver computeGJKSimplexFor(FirstSupportFunction firstObjectSup
 {
     static const int MaxNumberOfIterations = 32;
     static const float Epsilon = 1e-5;
+
+    if(startingDirectionHint.closeTo(Vector3::zeros()))
+        startingDirectionHint = Vector3(1, 0, 0);
+
 
     GJKVoronoiSimplexSolver simplex;
     auto nextDirection = startingDirectionHint;
@@ -572,6 +590,8 @@ ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSu
     auto correctedPenetrationDistance = distanceWithMargin - separationVectorLength;
     auto firstClosestPoint = gjkSimplex.computeClosesPointToOriginInFirstObject();
     auto secondClosestPoint = gjkSimplex.computeClosesPointToOriginInSecondObject();
+
+    firstClosestPoint = firstClosestPoint - (normal * distanceWithMargin);
 
     ContactPoint result;
     result.requiredSeparation = margin;

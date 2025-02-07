@@ -89,12 +89,12 @@ protected:
 
     Vector3 linearVelocity = Vector3::zeros();
     Vector3 linearAcceleration = Vector3::zeros();
-    float linearVelocityDamping = 0.2;
+    float linearVelocityDamping = 0.8;
     Vector3 netForce = Vector3::zeros();
 
     Vector3 angularVelocity = Vector3::zeros();
     Vector3 angularAcceleration = Vector3::zeros();
-    float angularVelocityDamping = 0.2;
+    float angularVelocityDamping = 0.8;
     Vector3 netTorque = Vector3::zeros();
 
     float mass = 0.0f;

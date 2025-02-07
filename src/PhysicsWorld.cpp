@@ -44,7 +44,9 @@ void PhysicsWorld::detectNarrowPhaseCollisionOf(const CollisionObjectPtr &firstC
     auto secondShape = secondCollisionObject->collisionShape;
     auto secondTransform = secondCollisionObject->getTransform();
 
-    auto separatingAxisHint = contactManifoldCache.lastSeparatingAxisFor(firstCollisionObject, secondCollisionObject);
+    auto separatingAxisHint = contactManifoldCache.lastSeparatingAxisFor(firstCollisionObject, secondCollisionObject).safeNormalized();
+    if(separatingAxisHint.closeTo(Vector3(0,0,0)))
+        separatingAxisHint = Vector3(1, 0, 0);
 
     auto contactPoints = firstShape->detectAndComputeCollisionContactPointsAt(firstTransform, secondShape, secondTransform, separatingAxisHint);
 
@@ -87,12 +89,13 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
         }
     }
 
-    size_t rounds = 2;
-    for(size_t i = 0; i < rounds*contactList.size(); ++i )
+
+    for(size_t rounds = 0; rounds < 2; ++rounds)
     {
         solveCollisionContactResponseList(contactList);
         solveCollisionContactConstraintList(contactList);
     }
+
 }
 
 
@@ -100,7 +103,7 @@ void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &
 {
     for(auto &contact : contactList)
     {
-        contact.update();
+        //contact.update();
         solveCollisionContactResponse(contact);
     }
 }
@@ -109,10 +112,11 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
 {
     // Are they already separating?
     auto separatingSpeed = contact.separationSpeed();
+    printf("separationSpeed %f\n", separatingSpeed);
     if(separatingSpeed > 0)
         return;
 
-    auto restitution = sqrt(contact.firstCollisionObject->getRestitutionCoefficient()*contact.secondCollisionObject->getRestitutionCoefficient());
+    auto restitution = std::min(contact.firstCollisionObject->getRestitutionCoefficient(), contact.secondCollisionObject->getRestitutionCoefficient());
 
     auto newSeparatingSpeed = -separatingSpeed*restitution;
     auto deltaSpeed = newSeparatingSpeed - separatingSpeed;
@@ -126,17 +130,16 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
     contact.firstCollisionObject->applyLinearImpulse(impulsePerIMass);
     contact.secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
 
-    printf("separationSpeed %f\n", separatingSpeed);
     printf("restitution %f\n", restitution);
     printf("inverseInertia %f\n", inverseInertia);
     printf("impulse %f\n", impulse);
-}
+}   
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
 {
     for(auto &contact : contactList)
     {
-        contact.update();
+        //contact.update();
         solveCollisionContactConstraint(contact);
     }
 }
@@ -144,6 +147,7 @@ void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint>
 void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
 {
     auto penetrationDistance = contact.penetrationDistance;
+    printf("penetrationDistance %f\n", penetrationDistance);
     if (penetrationDistance <= 0)
         return;
 
@@ -155,7 +159,6 @@ void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
     contact.firstCollisionObject->applyMovePerMass(movePerMass);
     contact.secondCollisionObject->applyMovePerMass(-movePerMass);
 
-    printf("penetrationDistance %f\n", penetrationDistance);
 }
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)

@@ -119,6 +119,22 @@ public:
         localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
     }
 
+    virtual Vector3 localSupportFunction(const Vector3 &D) const override
+    {   
+        float bestDistance = -INFINITY;
+        auto bestFound = Vector3::zeros();
+        for(auto &corner : corners)
+        {
+            auto distance = corner.dot(D);
+            if (distance > bestDistance)
+            {
+                bestDistance = distance;
+                bestFound = corner;
+            }
+        }
+        return bestFound;
+    }
+
     std::vector<Vector3> corners;
 };
 

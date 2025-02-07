@@ -142,6 +142,11 @@ struct alignas(16) Vector3
         return *this = *this + o;
     }
 
+    Vector3 operator*=(const Vector3 &o)
+    {
+        return *this = *this * o;
+    }
+
     bool operator==(const Vector3 & o) const
     {
         return x == o.x && y == o.y && z == o.z;
