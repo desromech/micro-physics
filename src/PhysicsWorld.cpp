@@ -79,7 +79,7 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
     if(manifolds.empty())
         return;
     
-    printf("Manifolds to solve: %zu\n", manifolds.size());
+    //printf("Manifolds to solve: %zu\n", manifolds.size());
     std::vector<ContactPoint> contactList;
     for(auto &manifold : manifolds)
     {
@@ -90,7 +90,7 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
     }
 
     const size_t RoundCount = 1;
-    printf("Contact list size %zu\n", contactList.size());
+    //printf("Contact list size %zu\n", contactList.size());
     for(size_t rounds = 0; rounds < RoundCount*contactList.size(); ++rounds)
     {
         solveCollisionContactResponseList(contactList);

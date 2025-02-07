@@ -20,7 +20,9 @@ void RigidBody::integrateMovement(float delta)
     linearVelocity += linearAcceleration*delta;
     linearVelocity *= pow(linearVelocityDamping, delta);
 
-    transform.translation += linearVelocity*delta;
+    auto translationDelta = linearVelocity*delta;
+    assert(!translationDelta.hasNaN());
+    transform.translation += translationDelta;
 
     netForce = Vector3::zeros();
     netTorque = Vector3::zeros();

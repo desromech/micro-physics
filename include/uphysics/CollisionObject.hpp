@@ -81,6 +81,7 @@ public:
 
     void setPosition(const Vector3 &newPosition)
     {
+        assert(!newPosition.hasNaN());
         transform.translation = newPosition;
         transformChanged();
     }
@@ -93,6 +94,7 @@ public:
     void setTransform(const TRSTransform &newTransform)
     {
         transform = newTransform;
+        assert(!transform.translation.hasNaN());
         transformChanged();
     }
 
