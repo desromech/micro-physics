@@ -26,6 +26,12 @@ public:
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
     virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
 
+    void setLocalBoundingBox(const AABox3 &box)
+    {
+        localBoundingBox = box;
+        localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
+    }
+
     float margin = 0.01f;
     AABox3 localBoundingBox;
     AABox3 localBoundingBoxWithMargin;

@@ -89,8 +89,9 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
         }
     }
 
-
-    for(size_t rounds = 0; rounds < 2; ++rounds)
+    const size_t RoundCount = 1;
+    printf("Contact list size %zu\n", contactList.size());
+    for(size_t rounds = 0; rounds < RoundCount*contactList.size(); ++rounds)
     {
         solveCollisionContactResponseList(contactList);
         solveCollisionContactConstraintList(contactList);
@@ -101,11 +102,27 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
 
 void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &contactList)
 {
+    if(contactList.empty())
+        return;
+
+    ContactPoint *bestFound = nullptr;
+    float bestFoundClosingSpeed = -INFINITY;
+
     for(auto &contact : contactList)
     {
-        //contact.update();
-        solveCollisionContactResponse(contact);
+        if(contact.hasCollisionResponse() && contact.inverseInertia() > 0.0)
+        {
+            auto closingSpeed = contact.closingSpeed();
+            if (!bestFound || closingSpeed > bestFoundClosingSpeed)
+            {
+                bestFound = &contact;
+                bestFoundClosingSpeed = closingSpeed;
+            }
+        }
     }
+
+    if(bestFound)
+        solveCollisionContactResponse(*bestFound);
 }
 
 void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
@@ -137,18 +154,32 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
 {
+    if(contactList.empty())
+        return;
+
+    ContactPoint *bestFound = nullptr;
+
     for(auto &contact : contactList)
     {
-        //contact.update();
-        solveCollisionContactConstraint(contact);
+        if(contact.hasCollisionResponse() && contact.inverseInertia() > 0.0)
+        {
+            //contact.update();
+            if (!bestFound || contact.penetrationDistance > bestFound->penetrationDistance)
+            {
+                bestFound = &contact;
+            }
+        }
     }
+
+    if(bestFound->penetrationDistance >= 0)
+        solveCollisionContactConstraint(*bestFound);
 }
 
 void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
 {
     auto penetrationDistance = contact.penetrationDistance;
     //printf("penetrationDistance %f\n", penetrationDistance);
-    if (penetrationDistance <= 0)
+    if (penetrationDistance < 0)
         return;
 
     auto totalInverseMass = contact.inverseLinearInertia();

@@ -83,6 +83,8 @@ void CompoundCollisionShape::addElement(const TRSTransform &transform, Collision
     element.transform = transform;
     element.shape = shape;
     elements.push_back(element);
+    localBoundingBox.insertBox(element.shape->localBoundingBox);
+    localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
 }
 
 std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
@@ -98,8 +100,8 @@ std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionConta
         auto elementContactPoints = element.shape->detectAndComputeCollisionContactPointsWithConvexShapeAt(firstTransform, secondShape, secondTransform, separatingAxisHint);
         if(elementContactPoints.empty())
             continue;
-        for(auto &contact : elementContactPoints)
-            contactPoints.push_back(contact);
+
+        contactPoints.insert(contactPoints.end(), elementContactPoints.begin(), elementContactPoints.end());
     }
     return contactPoints;
 }
