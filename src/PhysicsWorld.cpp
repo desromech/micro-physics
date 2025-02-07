@@ -112,12 +112,12 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
 {
     // Are they already separating?
     auto separatingSpeed = contact.separationSpeed();
-    printf("separationSpeed %f\n", separatingSpeed);
+    //printf("separationSpeed %f\n", separatingSpeed);
     if(separatingSpeed > 0)
         return;
 
     auto restitution = std::min(contact.firstCollisionObject->getRestitutionCoefficient(), contact.secondCollisionObject->getRestitutionCoefficient());
-
+    
     auto newSeparatingSpeed = -separatingSpeed*restitution;
     auto deltaSpeed = newSeparatingSpeed - separatingSpeed;
     float inverseInertia = contact.inverseLinearInertia();
@@ -130,9 +130,9 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
     contact.firstCollisionObject->applyLinearImpulse(impulsePerIMass);
     contact.secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
 
-    printf("restitution %f\n", restitution);
-    printf("inverseInertia %f\n", inverseInertia);
-    printf("impulse %f\n", impulse);
+    //printf("restitution %f\n", restitution);
+    //printf("inverseInertia %f\n", inverseInertia);
+    //printf("impulse %f\n", impulse);
 }   
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
@@ -147,7 +147,7 @@ void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint>
 void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
 {
     auto penetrationDistance = contact.penetrationDistance;
-    printf("penetrationDistance %f\n", penetrationDistance);
+    //printf("penetrationDistance %f\n", penetrationDistance);
     if (penetrationDistance <= 0)
         return;
 

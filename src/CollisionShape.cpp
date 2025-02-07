@@ -22,7 +22,10 @@ std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPoints
 
 std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
-    return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
+    auto result = secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, -separatingAxisHint);
+    for(auto &contact : result)
+        contact = contact.flipped();
+    return result;
 }
 
 std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
@@ -36,7 +39,7 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         return secondTransform.transformPosition(secondShape->localSupportFunction(secondTransform.inverseTransformNormal(D)));
     };
 
-    auto gjkSimplex = computeGJKSimplexFor(firstSupportFunction, secondSupportFunction, separatingAxisHint);
+    auto gjkSimplex = computeGJKSimplexFor(firstSupportFunction, secondSupportFunction, -separatingAxisHint);
     auto closestPointToOrigin = gjkSimplex.computeClosesPointToOrigin();
     auto totalMargin = margin + secondShape->margin;
     auto shapeDistance = closestPointToOrigin.length();
@@ -44,22 +47,24 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         return std::vector<ContactPoint>{};
 
     if (shapeDistance >= ShallowPenetrationThreshold) {
-        printf("Shallow Convex Convex contact.\n");
+
         ContactPoint shallowContact;
         shallowContact.normal = closestPointToOrigin.normalized();
         shallowContact.requiredSeparation = totalMargin;
         shallowContact.firstPoint = gjkSimplex.computeClosesPointToOriginInFirstObject();
         shallowContact.secondPoint = gjkSimplex.computeClosesPointToOriginInSecondObject();
         shallowContact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
-        //shallowContact.computeWorldContactPointAndDistances();
+        shallowContact.computeWorldContactPointAndDistances();
+        //printf("Shallow constant normal %f %f %f\n", shallowContact.normal.x, shallowContact.normal.y, shallowContact.normal.z);
         return std::vector{shallowContact};
     };
 
-    auto contact = samplePenetrationSupportContact(secondSupportFunction, firstSupportFunction, totalMargin, separatingAxisHint);
+    auto contact = samplePenetrationSupportContact(firstSupportFunction, secondSupportFunction, totalMargin, separatingAxisHint);
     //printf("Sample penetration.\n");
     if(!contact.isValid)
         return std::vector<ContactPoint>{};
 
+    //printf("Deep constant normal %f %f %f\n", contact.normal.x, contact.normal.y, contact.normal.z);
     contact.requiredSeparation = totalMargin;
     contact.penetrationDistance += totalMargin;
     contact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
