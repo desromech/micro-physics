@@ -20,47 +20,28 @@ namespace UPhysics
         ContactManifold flipped()
         {
             ContactManifold result;
-            for (size_t i = 0; i < size; ++i)
-                result.points[i] = points[i].flipped();
-            result.size = size;
+            result.contactList.reserve(contactList.size());
+            for (size_t i = 0; i < contactList.size(); ++i)
+                result.contactList.push_back(contactList[i].flipped());
             return result; 
-        }
-
-        void augmentWith(const ContactManifold &augmentation)
-        {
-            for(size_t i = 0; i < augmentation.size; ++i)
-                addPoint(augmentation.points[i]);
-        }
-
-        void makeRoomForPoint()
-        {
-            if(size < MaxContactPoints)
-                return;
-            
-            for(size_t i = 1; i < MaxContactPoints; ++i)
-                points[i - 1] = points[i];
-            --size;
         }
 
         void addPoint(const ContactPoint& contactPoint)
         {
             assert(!contactPoint.normal.hasNaN());
-            makeRoomForPoint();
-            auto &targetPoint = points[size];
-            targetPoint = contactPoint;
-            targetPoint.firstCollisionObject = firstCollisionObject.get();
-            targetPoint.secondCollisionObject = secondCollisionObject.get();
-            ++size;
+            contactList.push_back(contactPoint);
+            contactList.back().firstCollisionObject = firstCollisionObject.get();
+            contactList.back().secondCollisionObject = secondCollisionObject.get();
         }
 
         void setCollisionObjects(const CollisionObjectPtr &first, const CollisionObjectPtr &second)
         {
             firstCollisionObject = first;
             secondCollisionObject = second;
-            for(size_t i = 0; i < size; ++i)
+            for(size_t i = 0; i < contactList.size(); ++i)
             {
-                points[i].firstCollisionObject = first.get();
-                points[i].secondCollisionObject = second.get();
+                contactList[i].firstCollisionObject = first.get();
+                contactList[i].secondCollisionObject = second.get();
             }
         }
 
@@ -72,11 +53,11 @@ namespace UPhysics
 
         void update()
         {
-            for(size_t i = 0; i <MaxContactPoints; ++i)
+            for(size_t i = 0; i < contactList.size() ; ++i)
             {
-                points[i].firstCollisionObject = firstCollisionObject.get();
-                points[i].secondCollisionObject = secondCollisionObject.get();
-                points[i].update();
+                contactList[i].firstCollisionObject = firstCollisionObject.get();
+                contactList[i].secondCollisionObject = secondCollisionObject.get();
+                contactList[i].update();
             }
         }
 
@@ -86,13 +67,13 @@ namespace UPhysics
             update();
 
             size_t destPosition = 0;
-            for(size_t i = 0; i < size; ++i)
+            for(size_t i = 0; i < contactList.size(); ++i)
             {
-                bool isExpired = (-points[i].penetrationDistance > MaxSeparationTolerated) || points[i].epoch < expiredEpoch;
+                bool isExpired = (-contactList[i].penetrationDistance > MaxSeparationTolerated) || contactList[i].epoch < expiredEpoch;
                 if(!isExpired)
-                    points[destPosition++] = points[i];
+                    contactList[destPosition++] = contactList[i];
             }
-            size = destPosition;
+            contactList.resize(destPosition);
         }
 
         CollisionObjectPtr firstCollisionObject;
@@ -100,9 +81,7 @@ namespace UPhysics
 
         Vector3 lastSeparatingAxis = Vector3(1, 0, 0);
         uint32_t epoch = 0;
-
-        size_t size = 0;
-        std::array<ContactPoint, MaxContactPoints> points;
+        std::vector<ContactPoint> contactList;
     };
 
     class ContactManifoldCache

@@ -16,17 +16,30 @@ void RigidBody::integrateMovement(float delta)
     if(!ownerWorld)
         return;
 
+
+    // integrate linear movement
     linearAcceleration = netForce*inverseMass + ownerWorld->getGravity() + linearEngineAcceleration;
     linearVelocity += linearAcceleration*delta;
     linearVelocity *= pow(linearVelocityDamping, delta);
 
+    // Integrate angular movement.
+    angularAcceleration = inverseInertiaTensor *netTorque;
+    angularVelocity += angularAcceleration*delta;
+    angularVelocity *= pow(angularVelocityDamping, delta);
+
+    // Integrate position
     auto translationDelta = linearVelocity*delta;
     assert(!translationDelta.hasNaN());
-    transform.translation += translationDelta;
+    auto integratedPosition = getPosition() + translationDelta;
+
+    // Integrate orientation
+    auto integratedOrientation = Quaternion(angularVelocity * (0.5*delta), 0.0f).exp() * getOrientation();
+    integratedOrientation = integratedOrientation.normalized();
+
+    setPositionAndOrientation(integratedPosition, integratedOrientation);
 
     netForce = Vector3::zeros();
     netTorque = Vector3::zeros();
-    transformChanged();
 }
 
 } // End of namespace UPhysics

@@ -48,6 +48,16 @@ public:
         return restitutionCoefficient;
     }
 
+    virtual void transformChanged() override
+    {
+        CollisionObject::transformChanged();
+
+        rotationMatrix = transform.rotation.asMatrix3x3();
+        auto transposedRotationMatrix = rotationMatrix;
+        worldInertiaTensor = rotationMatrix * inertiaTensor * transposedRotationMatrix;
+	    worldInverseInertiaTensor = rotationMatrix * inverseInertiaTensor * transposedRotationMatrix;
+    }
+
     virtual Vector3 computeVelocityAtRelativePoint(const Vector3 &relativePoint)
     {
         return linearVelocity;
@@ -97,8 +107,15 @@ public:
         return linearEngineAcceleration;
     }
 
+    virtual float computeAngularInertiaForRelativeContactPoint(const Vector3 &relativePoint, const Vector3 &normal)
+    {
+        auto torquePerUnitImpulse = relativePoint.cross(normal);
+        auto rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
+        return rotationPerUnitImpulse.cross(relativePoint).dot(normal);
+    }
+
 protected:
-    float restitutionCoefficient = 0.2;
+    float restitutionCoefficient = 0.1;
 
     Vector3 linearEngineAcceleration = Vector3::zeros();
     Vector3 linearVelocity = Vector3::zeros();
@@ -114,8 +131,11 @@ protected:
     float mass = 0.0f;
     float inverseMass = 0.0f;
 
-    Matrix3x3 inertiaTensor;
-    Matrix3x3 inverseInertiaTensor;
+    Matrix3x3 rotationMatrix = Matrix3x3::zeros();
+    Matrix3x3 inertiaTensor = Matrix3x3::zeros();
+    Matrix3x3 inverseInertiaTensor = Matrix3x3::zeros();
+    Matrix3x3 worldInertiaTensor = Matrix3x3::zeros();
+    Matrix3x3 worldInverseInertiaTensor = Matrix3x3::zeros();
 };
 } // End of namespace UPhysics
 

@@ -15,7 +15,8 @@ float ContactPoint::inverseLinearInertia() const
 
 float ContactPoint::inverseAngularInertia() const
 {
-    return 0.0;
+    return firstCollisionObject->computeAngularInertiaForRelativeContactPoint(relativeFirstPoint(), normal)
+        + secondCollisionObject->computeAngularInertiaForRelativeContactPoint(relativeSecondPoint(), normal);
 }
 
 float ContactPoint::inverseInertia() const

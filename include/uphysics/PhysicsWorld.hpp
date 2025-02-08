@@ -27,6 +27,8 @@ public:
     void solveCollisionContactResponse(ContactPoint &contact);
     void solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList);
     void solveCollisionContactConstraint(ContactPoint &contact);
+    ContactPoint *findMostSevereCollisionContactInList(std::vector<ContactPoint> &contactList);
+    ContactPoint *findMostSeverePenetratingContactInList(std::vector<ContactPoint> &contactList);
 
     void setGravity(const Vector3 &newGravity)
     {

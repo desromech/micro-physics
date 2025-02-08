@@ -80,30 +80,32 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
         return;
     
     //printf("Manifolds to solve: %zu\n", manifolds.size());
-    std::vector<ContactPoint> contactList;
+    /*std::vector<ContactPoint> contactList;
     for(auto &manifold : manifolds)
     {
         if(manifold->hasCollisionResponse())
         {
             contactList.insert(contactList.end(), manifold->points.begin(), manifold->points.begin() + manifold->size);
         }
+    }*/
+
+    for(auto &manifold : manifolds)
+    {
+        if(!manifold->hasCollisionResponse())
+            continue;;
+
+        solveCollisionContactResponseList(manifold->contactList);
+        solveCollisionContactConstraintList(manifold->contactList);
+
     }
 
-    const size_t RoundCount = 1;
-    //printf("Contact list size %zu\n", contactList.size());
-    for(size_t rounds = 0; rounds < RoundCount*contactList.size(); ++rounds)
-    {
-        solveCollisionContactResponseList(contactList);
-        solveCollisionContactConstraintList(contactList);
-    }
 
 }
 
-
-void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &contactList)
+ContactPoint *PhysicsWorld::findMostSevereCollisionContactInList(std::vector<ContactPoint> &contactList)
 {
     if(contactList.empty())
-        return;
+        return nullptr;
 
     ContactPoint *bestFound = nullptr;
     float bestFoundClosingSpeed = -INFINITY;
@@ -120,9 +122,46 @@ void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &
             }
         }
     }
+    return bestFound;
 
-    if(bestFound)
-        solveCollisionContactResponse(*bestFound);
+}
+
+ContactPoint *PhysicsWorld::findMostSeverePenetratingContactInList(std::vector<ContactPoint> &contactList)
+{
+    if(contactList.empty())
+        return nullptr;
+
+    ContactPoint *bestFound = nullptr;
+    for (auto &contact : contactList)
+    {
+        if(contact.hasCollisionResponse() && contact.inverseLinearInertia() > 0.0) 
+        {
+            contact.update();
+            if(!bestFound || contact.penetrationDistance > bestFound->penetrationDistance)
+            {
+                bestFound = &contact;
+            }
+        }
+    }
+
+	return bestFound;
+}
+
+void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &contactList)
+{
+    if(contactList.empty())
+        return;
+
+    for(auto &contact : contactList)
+        contact.update();
+
+    for(size_t i = 0; i < contactList.size()*2; ++i)
+    {
+        ContactPoint *contact = findMostSevereCollisionContactInList(contactList);
+        if(!contact)
+            break;
+        solveCollisionContactResponse(*contact);
+    }
 }
 
 void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
@@ -157,22 +196,14 @@ void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint>
     if(contactList.empty())
         return;
 
-    ContactPoint *bestFound = nullptr;
-
-    for(auto &contact : contactList)
+    for(size_t i = 0; i <contactList.size()*2; ++i)
     {
-        if(contact.hasCollisionResponse() && contact.inverseInertia() > 0.0)
-        {
-            //contact.update();
-            if (!bestFound || contact.penetrationDistance > bestFound->penetrationDistance)
-            {
-                bestFound = &contact;
-            }
-        }
-    }
+        ContactPoint *nextPoint = findMostSeverePenetratingContactInList(contactList);
+        if(!nextPoint)
+            break;
 
-    if(bestFound->penetrationDistance >= 0)
-        solveCollisionContactConstraint(*bestFound);
+        solveCollisionContactConstraint(*nextPoint); 
+    }
 }
 
 void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)

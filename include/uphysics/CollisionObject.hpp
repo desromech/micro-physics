@@ -79,9 +79,21 @@ public:
         return transform.translation;
     }
 
+    const Quaternion &getOrientation() const
+    {
+        return transform.rotation;
+    }
+
     void setPosition(const Vector3 &newPosition)
     {
         assert(!newPosition.hasNaN());
+        transform.translation = newPosition;
+        transformChanged();
+    }
+
+    void setPositionAndOrientation(const Vector3 &newPosition, const Quaternion &newOrientation)
+    {
+        transform.rotation = newOrientation;
         transform.translation = newPosition;
         transformChanged();
     }
@@ -116,6 +128,11 @@ public:
     virtual Vector3 getAngularVelocity() const
     {
         return Vector3::zeros();
+    }
+    
+    virtual float computeAngularInertiaForRelativeContactPoint(const Vector3 &relativePoint, const Vector3 &normal)
+    {
+        return 0.0f;
     }
 
     CollisionShapePtr collisionShape;

@@ -87,6 +87,15 @@ struct Quaternion
         return Quaternion(x/l, y/l, z/l, w/l);
     }
 
+    Quaternion safeNormalized() const
+    {
+        auto l = length();
+        if(l < 1e-12)
+            return Quaternion(0.0f);
+
+        return Quaternion(x/l, y/l, z/l, w/l);
+    }
+
     Quaternion interpolateTo(const Quaternion &o, float alpha) const
     {
         return Quaternion(
@@ -145,6 +154,11 @@ struct Quaternion
     Quaternion operator/(float s) const
     {
         return Quaternion(x/s, y/s, z/s, w/s);
+    }
+
+    bool operator==(const Quaternion &o)
+    {
+        return x == o.x && y == o.y && z == o.z && w == o.w;
     }
 
     Matrix3x3 asMatrix3x3() const
