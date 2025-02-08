@@ -55,7 +55,7 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
         shallowContact.secondPoint = gjkSimplex.computeClosesPointToOriginInSecondObject();
         shallowContact.computeLocalVersionsWithTransforms(firstTransform, secondTransform);
         shallowContact.computeWorldContactPointAndDistances();
-        printf("Shallow constant normal %f %f %f\n", shallowContact.normal.x, shallowContact.normal.y, shallowContact.normal.z);
+        //printf("Shallow constant normal %f %f %f\n", shallowContact.normal.x, shallowContact.normal.y, shallowContact.normal.z);
         return std::vector{shallowContact};
     };
 

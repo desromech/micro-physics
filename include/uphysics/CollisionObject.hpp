@@ -135,6 +135,13 @@ public:
         return 0.0f;
     }
 
+    virtual void applyMovementAtRelativePoint(float movement, const Vector3 &relativePoint, const Vector3 &movementDirection)
+    {
+        (void)movement;
+        (void)relativePoint;
+        (void)movementDirection;
+    }
+
     CollisionShapePtr collisionShape;
     PhysicsWorld *ownerWorld = nullptr;
 

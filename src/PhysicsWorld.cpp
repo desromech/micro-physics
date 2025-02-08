@@ -202,25 +202,27 @@ void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint>
         if(!nextPoint)
             break;
 
-        solveCollisionContactConstraint(*nextPoint); 
+        solveCollisionContactConstraint(*nextPoint, 0.8f); 
     }
 }
 
-void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact)
+void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact, float relaxationFactor)
 {
     auto penetrationDistance = contact.penetrationDistance;
     //printf("penetrationDistance %f\n", penetrationDistance);
     if (penetrationDistance < 0)
         return;
 
-    auto totalInverseMass = contact.inverseLinearInertia();
-    if(totalInverseMass <= 0)
+    auto inverseInertia = contact.inverseInertia();
+    if(inverseInertia <= 0)
         return;
 
-    auto movePerMass = contact.normal * (penetrationDistance / totalInverseMass);
-    contact.firstCollisionObject->applyMovePerMass(movePerMass);
-    contact.secondCollisionObject->applyMovePerMass(-movePerMass);
+    auto penetrationDelta = penetrationDistance * relaxationFactor / inverseInertia;
+    if(contact.firstCollisionObject->hasCollisionResponse())
+        contact.firstCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact.relativeFirstPoint(),contact.normal);
 
+    if(contact.secondCollisionObject->hasCollisionResponse())
+        contact.secondCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact.relativeSecondPoint(), -contact.normal);
 }
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)

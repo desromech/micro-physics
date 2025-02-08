@@ -107,11 +107,55 @@ public:
         return linearEngineAcceleration;
     }
 
-    virtual float computeAngularInertiaForRelativeContactPoint(const Vector3 &relativePoint, const Vector3 &normal)
+    virtual float computeAngularInertiaForRelativeContactPoint(const Vector3 &relativePoint, const Vector3 &normal) override
     {
         auto torquePerUnitImpulse = relativePoint.cross(normal);
         auto rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
         return rotationPerUnitImpulse.cross(relativePoint).dot(normal);
+    }
+
+    void wakeUpForTranslationBy(const Vector3 &translation)
+    {
+        // TODO: wakeup
+        setPosition(getPosition() + translation);
+    }
+
+    void translateByAndRotateByIncrement(const Vector3 &linearIncrement, const Vector3 &angularIncrement)
+    {
+        transform.translation += linearIncrement;
+        //transform.rotation = Quaternion(angularIncrement*0.5).exp() * transform.rotation;
+    }
+
+    void wakeUpForTranslationByAndRotateByAngularIncrement(const Vector3 &linearIncrement, const Vector3 &angularIncrement)
+    {
+        // TODO: wakeup
+        translateByAndRotateByIncrement(linearIncrement, angularIncrement);
+    }
+
+    virtual void applyMovementAtRelativePoint(float movement, const Vector3 &relativePoint, const Vector3 &movementDirection) override
+    {
+        auto linearMovement = movement * inverseMass;
+
+        auto angularDirection = worldInverseInertiaTensor * relativePoint.cross(movementDirection);
+        auto angularFactor = angularDirection.length();
+        if(closeTo(angularFactor, 0))
+            return wakeUpForTranslationBy(movementDirection * linearMovement);
+
+        angularDirection /= angularFactor;
+        auto angularMovement = movement * angularFactor;
+        if(abs(angularMovement) <= 0.0)
+            return wakeUpForTranslationBy(movementDirection * linearMovement);
+
+        const float AngularMovementLimit = 0.2f;
+        if(abs(angularMovement) > AngularMovementLimit)
+        {
+            angularMovement = angularMovement >= 0 ? AngularMovementLimit : -AngularMovementLimit;
+            auto angularSpentMovement = angularMovement / angularFactor;
+            assert(angularSpentMovement >= 0);
+            linearMovement = (movement - angularSpentMovement)*inverseMass;
+        }
+
+        wakeUpForTranslationByAndRotateByAngularIncrement(movementDirection * linearMovement, angularDirection*angularMovement);
     }
 
 protected:
