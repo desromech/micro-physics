@@ -29,6 +29,8 @@ public:
 
     void computeMassDistribution()
     {
+        inertiaTensor = collisionShape->computeInertiaTensorWithMass(mass);
+        inverseInertiaTensor = inertiaTensor.inverse();
     }
 
     virtual float getMass() const override
@@ -111,6 +113,9 @@ protected:
 
     float mass = 0.0f;
     float inverseMass = 0.0f;
+
+    Matrix3x3 inertiaTensor;
+    Matrix3x3 inverseInertiaTensor;
 };
 } // End of namespace UPhysics
 

@@ -22,9 +22,24 @@ public:
         return false;
     }
 
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint);
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint);
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint);
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint);
+
+    virtual Matrix3x3 computeInertiaTensorWithMass(float mass)
+    {
+        auto extent = localBoundingBox.extent();
+        auto w = extent.x;
+        auto h = extent.y;
+        auto d = extent.z;
+        auto m12 = mass / 12.0f;
+
+        return Matrix3x3{
+            {m12*(h*h +d*d), 0, 0},
+            {0, m12*(w*w + h*h), 0},
+            {0, 0, m12*(w*w + d*d)}
+        };
+    }
 
     void setLocalBoundingBox(const AABox3 &box)
     {
@@ -50,9 +65,9 @@ public:
         return Vector3::zeros();
     }
 
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
     
 };
 
@@ -153,18 +168,18 @@ public:
 class CompoundShapeElement
 {
 public:
-    TRSTransform transform;
+    RigidTransform transform;
     CollisionShapePtr shape;
 };
 
 class CompoundCollisionShape : public CollisionShape
 {
 public:
-    void addElement(const TRSTransform &transform, CollisionShapePtr shape);
+    void addElement(const RigidTransform &transform, CollisionShapePtr shape);
 
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
-    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
+    virtual std::vector<ContactPoint> detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
 
 private:
     std::vector<CompoundShapeElement> elements;

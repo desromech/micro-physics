@@ -92,7 +92,7 @@ void testFallingBoxWithCompoundFloor()
     floorCollisionShape->setHalfExtent(Vector3(5, 0.25, 5));
     
     auto floorCompoundShape = std::make_shared<CompoundCollisionShape> ();
-    floorCompoundShape->addElement(TRSTransform(), floorCollisionShape);
+    floorCompoundShape->addElement(RigidTransform(), floorCollisionShape);
 
     auto floorCollisionObject = std::make_shared<CollisionObject> ();
     floorCollisionObject->collisionShape = floorCompoundShape;

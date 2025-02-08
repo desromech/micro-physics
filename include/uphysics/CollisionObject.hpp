@@ -1,7 +1,7 @@
 #ifndef UPHYSICS_COLLISION_OBJECT_HPP
 #define UPHYSICS_COLLISION_OBJECT_HPP
 
-#include "uphysics/TRSTransform.hpp"
+#include "uphysics/RigidTransform.hpp"
 #include "uphysics/CollisionShape.hpp"
 #include <memory>
 namespace UPhysics
@@ -86,12 +86,12 @@ public:
         transformChanged();
     }
 
-    const TRSTransform &getTransform() const
+    const RigidTransform &getTransform() const
     {
         return transform;
     }
 
-    void setTransform(const TRSTransform &newTransform)
+    void setTransform(const RigidTransform &newTransform)
     {
         transform = newTransform;
         assert(!transform.translation.hasNaN());
@@ -122,7 +122,7 @@ public:
     PhysicsWorld *ownerWorld = nullptr;
 
 protected:
-    TRSTransform transform;
+    RigidTransform transform;
     uint32_t monotonicID;
 
 };

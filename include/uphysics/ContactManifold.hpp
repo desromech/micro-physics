@@ -15,7 +15,7 @@ namespace UPhysics
     typedef struct std::shared_ptr<struct ContactManifold> ContactManifoldPtr;
     struct ContactManifold
     {
-        static const size_t MaxContactPoints = 1;
+        static const size_t MaxContactPoints = 4;
 
         ContactManifold flipped()
         {
@@ -80,10 +80,26 @@ namespace UPhysics
             }
         }
 
+        void expireContactsUntil(uint32_t expiredEpoch, uint32_t newEpoch)
+        {
+            float MaxSeparationTolerated = 0.01f;
+            update();
+
+            size_t destPosition = 0;
+            for(size_t i = 0; i < size; ++i)
+            {
+                bool isExpired = (-points[i].penetrationDistance > MaxSeparationTolerated) || points[i].epoch < expiredEpoch;
+                if(!isExpired)
+                    points[destPosition++] = points[i];
+            }
+            size = destPosition;
+        }
+
         CollisionObjectPtr firstCollisionObject;
         CollisionObjectPtr secondCollisionObject;
 
         Vector3 lastSeparatingAxis = Vector3(1, 0, 0);
+        uint32_t epoch = 0;
 
         size_t size = 0;
         std::array<ContactPoint, MaxContactPoints> points;
@@ -102,9 +118,20 @@ namespace UPhysics
 	        expireOldManifoldContacts();
         }
 
+        uint32_t lastExpiredEpoch()
+        {
+            if(epoch >= 4)
+                return epoch - 4;
+            else
+                return (uint32_t)-1;
+        }
+
         void expireOldManifoldContacts()
         {
-            manifolds.clear();
+            auto expiredEpoch = lastExpiredEpoch();
+            for (auto &manifold : manifolds)
+                manifold->expireContactsUntil(expiredEpoch, epoch);
+
             manifoldDictionary.clear();
         }
 
@@ -157,6 +184,7 @@ namespace UPhysics
                 auto insertedContact = contact;
                 insertedContact.epoch = epoch;
                 manifold->addPoint(insertedContact);
+                manifold->epoch = epoch;
             }
 
         }

@@ -3,6 +3,7 @@
 
 #include "Vector3.hpp"
 #include "TRSTransform.hpp"
+#include "RigidTransform.hpp"
 #include <vector>
 
 namespace UPhysics
@@ -117,6 +118,17 @@ struct AABox3
     }
 
     AABox3 transformedWith(const TRSTransform &transform)
+    {
+        auto result = empty();
+        auto matrix = transform.asMatrix();
+        cornersDo([&](const Vector3 &corner){
+            result.insertPoint(((matrix*Vector4(corner, 1)).xyz()));
+        });
+
+        return result;
+    }
+
+    AABox3 transformedWith(const RigidTransform &transform)
     {
         auto result = empty();
         auto matrix = transform.asMatrix();

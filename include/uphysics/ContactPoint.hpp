@@ -3,7 +3,7 @@
 
 #include "Vector3.hpp"
 #include "Matrix3x3.hpp"
-#include "TRSTransform.hpp"
+#include "RigidTransform.hpp"
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -40,8 +40,8 @@ namespace UPhysics
         float closingSpeed() const;
 
         void update();
-        void computeLocalVersionsWithTransforms(const TRSTransform &firstTransform, const TRSTransform &secondTransform);
-        void computeWorldVersionWithTransforms(const TRSTransform &firstTransform, const TRSTransform &secondTransform);
+        void computeLocalVersionsWithTransforms(const RigidTransform &firstTransform, const RigidTransform &secondTransform);
+        void computeWorldVersionWithTransforms(const RigidTransform &firstTransform, const RigidTransform &secondTransform);
         void computeWorldContactPointAndDistances();
         Matrix3x3 computeContactSpaceMatrix() const;
         ContactPoint flipped() const;

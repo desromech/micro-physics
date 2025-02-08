@@ -6,12 +6,19 @@
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.hpp"
 #include "Math.hpp"
+#include "RigidTransform.hpp"
 
 namespace UPhysics
 {
 
 struct TRSTransform
 {
+    TRSTransform() = default;
+    TRSTransform(const RigidTransform &rigidTransform)
+        : rotation(rigidTransform.rotation), translation(rigidTransform.translation) {}
+    TRSTransform(const Vector3 &initScale, const Quaternion &initRotation , const Vector3 &initTranslation)
+        : scale(initScale), rotation(initRotation), translation(initTranslation) {}
+
     Vector3 scale = Vector3(1.0f);
     Quaternion rotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
     Vector3 translation = Vector3(0.0f);

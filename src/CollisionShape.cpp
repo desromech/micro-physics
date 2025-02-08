@@ -5,22 +5,22 @@
 namespace UPhysics
 {
 
-std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPoint>{};
 }
 
-std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPoint>{};
 }
 
-std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPoint>{};
 }
 
-std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     auto result = secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, -separatingAxisHint);
     for(auto &contact : result)
@@ -28,7 +28,7 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     return result;
 }
 
-std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     static const float ShallowPenetrationThreshold = 1.0e-5;
 
@@ -72,12 +72,12 @@ std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContact
     return std::vector{contact};
 }
 
-std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> ConvexCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return secondShape->detectAndComputeCollisionContactPointsWithConvexShapeAt(secondTransform, std::static_pointer_cast<ConvexCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
 }
 
-void CompoundCollisionShape::addElement(const TRSTransform &transform, CollisionShapePtr shape)
+void CompoundCollisionShape::addElement(const RigidTransform &transform, CollisionShapePtr shape)
 {
     CompoundShapeElement element;
     element.transform = transform;
@@ -87,11 +87,11 @@ void CompoundCollisionShape::addElement(const TRSTransform &transform, Collision
     localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
 }
 
-std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsAt(const TRSTransform &firstTransform, const CollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return secondShape->detectAndComputeCollisionContactPointsWithCompoundShape(secondTransform, std::static_pointer_cast<CompoundCollisionShape> (shared_from_this()), firstTransform, separatingAxisHint);
 }
-std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const TRSTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     std::vector<ContactPoint> contactPoints;
     for(auto &element : elements)
@@ -104,7 +104,7 @@ std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionConta
     }
     return contactPoints;
 }
-std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const TRSTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const TRSTransform &secondTransform, const Vector3 &separatingAxisHint)
+std::vector<ContactPoint> CompoundCollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     printf("TODO: Compund-Compund\n");
     return std::vector<ContactPoint> {};
