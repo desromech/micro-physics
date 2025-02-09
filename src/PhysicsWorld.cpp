@@ -155,16 +155,14 @@ void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPo
     for(auto &contact : contactList)
         contact->update();
 
-    /*for(size_t i = 0; i < contactList.size()*2; ++i)
+    for(size_t i = 0; i < contactList.size()*2; ++i)
     {
         ContactPointPtr contact = findMostSevereCollisionContactInList(contactList);
         if(!contact)
             break;
         solveCollisionContactResponse(contact);
-    }*/
-    for(auto &contact : contactList)
-        solveCollisionContactResponse(contact);
-    
+        contact->update();
+    }
 }
 
 void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)

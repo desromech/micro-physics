@@ -82,8 +82,8 @@ public:
 
     virtual void applyImpulseAtRelativePosition(Vector3 impulse, Vector3 relativePosition)
     {
-        linearVelocity += (impulse*inverseMass);
-        angularVelocity += (worldInverseInertiaTensor * relativePosition.cross(impulse));
+        linearVelocity += impulse*inverseMass;
+        angularVelocity += worldInverseInertiaTensor * relativePosition.cross(impulse);
         checkWakeUpDueToExternalImpulse();
     }
 

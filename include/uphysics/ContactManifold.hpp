@@ -15,7 +15,7 @@ namespace UPhysics
     typedef struct std::shared_ptr<struct ContactManifold> ContactManifoldPtr;
     struct ContactManifold
     {
-        static const size_t MaxContactPoints = 1;
+        static const size_t MaxContactPoints = 4;
 
         ContactManifoldPtr flipped()
         {
