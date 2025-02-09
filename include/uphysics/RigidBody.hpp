@@ -53,7 +53,7 @@ public:
         CollisionObject::transformChanged();
 
         rotationMatrix = transform.rotation.asMatrix3x3();
-        auto transposedRotationMatrix = rotationMatrix;
+        auto transposedRotationMatrix = rotationMatrix.transposed();
         worldInertiaTensor = rotationMatrix * inertiaTensor * transposedRotationMatrix;
 	    worldInverseInertiaTensor = rotationMatrix * inverseInertiaTensor * transposedRotationMatrix;
     }
@@ -62,7 +62,7 @@ public:
     {
         return linearVelocity;
     }
-
+    
     virtual bool needsCollisionDetection() const
     {
         return inverseMass != 0.0f;
