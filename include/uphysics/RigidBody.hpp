@@ -31,8 +31,8 @@ public:
     {
         inertiaTensor = collisionShape->computeInertiaTensorWithMass(mass);
         inverseInertiaTensor = inertiaTensor.inverse();
-        inertiaTensor = Matrix3x3::zeros();
-        inverseInertiaTensor = Matrix3x3::zeros();
+        //inertiaTensor = Matrix3x3::zeros();
+        //inverseInertiaTensor = Matrix3x3::zeros();
         computeWorldSpaceInertiaTensors();
     }
 

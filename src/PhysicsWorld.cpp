@@ -152,8 +152,8 @@ void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPo
     if(contactList.empty())
         return;
 
-    //for(auto &contact : contactList)
-    //    contact->update();
+    for(auto &contact : contactList)
+        contact->update();
 
     /*for(size_t i = 0; i < contactList.size()*2; ++i)
     {
@@ -162,8 +162,9 @@ void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPo
             break;
         solveCollisionContactResponse(contact);
     }*/
-   for(auto &contact : contactList)
+    for(auto &contact : contactList)
         solveCollisionContactResponse(contact);
+    
 }
 
 void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
@@ -283,16 +284,16 @@ void PhysicsWorld::solveCollisionContactConstraintList(const std::vector<Contact
     if(contactList.empty())
         return;
 
-    /*for(size_t i = 0; i <contactList.size()*2; ++i)
+    for(size_t i = 0; i <contactList.size()*2; ++i)
     {
         ContactPointPtr nextPoint = findMostSeverePenetratingContactInList(contactList);
         if(!nextPoint)
             break;
 
         solveCollisionContactConstraint(nextPoint, 0.8f); 
-    }*/
-    for(auto &contact : contactList)
-        solveCollisionContactConstraint(contact, 0.8f);
+    }
+    /*for(auto &contact : contactList)
+        solveCollisionContactConstraint(contact, 0.8f);*/
 }
 
 void PhysicsWorld::solveCollisionContactConstraint(const ContactPointPtr &contact, float relaxationFactor)
