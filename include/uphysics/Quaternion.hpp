@@ -111,13 +111,23 @@ struct Quaternion
         auto v = Vector3(x, y, z);
         auto vl = v.length();
         auto ew = ::exp(w);
-        if(closeTo(vl, 0.0)) {
+        if(UPhysics::closeTo(vl, 0.0)) {
             return Quaternion(0, 0, 0, ew);
         }
         
         auto c = cos(vl);
         auto s = sin(vl);
         return Quaternion(v * (s / vl*ew), ew*c);
+    }
+
+    Quaternion ln() const
+    {
+	    auto l = length();
+	    auto xyz = Vector3(x, y, z);
+	    auto xyzl = xyz.length();
+
+        auto xyzln = xyzl > 0 ? (xyz * (acos(w/l) / xyzl)) : Vector3::zeros();
+        return Quaternion(xyzln, ::log(l));
     }
 
     Vector3 rotateVector(const Vector3 &v) const
@@ -154,6 +164,11 @@ struct Quaternion
     Quaternion operator/(float s) const
     {
         return Quaternion(x/s, y/s, z/s, w/s);
+    }
+
+    bool closeTo(const Quaternion &o) const
+    {
+        return UPhysics::closeTo(x, o.x) && UPhysics::closeTo(y, o.y) && UPhysics::closeTo(z, o.z) && UPhysics::closeTo(w, o.w);
     }
 
     bool operator==(const Quaternion &o)
