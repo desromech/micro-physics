@@ -167,7 +167,7 @@ void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPo
 
 void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
 {
-#if 0
+#if 1
 	// See Milling. 'Game Physics Engine Development'. Chapter 14 for details on these equations and the associated algorithms."
     auto firstCollisionObject = contact->firstCollisionObject;
     auto secondCollisionObject = contact->secondCollisionObject;
