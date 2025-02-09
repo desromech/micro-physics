@@ -62,7 +62,7 @@ void ContactPoint::computeLocalVersionsWithTransforms(const RigidTransform &firs
 void ContactPoint::computeWorldVersionWithTransforms(const RigidTransform &firstTransform, const RigidTransform &secondTransform)
 {
     firstPoint = firstTransform.transformPosition(localFirstPoint);
-    secondPoint = firstTransform.transformPosition(localSecondPoint);
+    secondPoint = secondTransform.transformPosition(localSecondPoint);
     normal = firstTransform.transformNormal(secondTransform.transformNormal(localFirstNormal));
     //normal = secondTransform.transformNormal(firstTransform.transformNormal(localFirstNormal));
     assert(!firstPoint.hasNaN());

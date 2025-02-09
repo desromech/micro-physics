@@ -152,20 +152,23 @@ void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPo
     if(contactList.empty())
         return;
 
-    for(auto &contact : contactList)
-        contact->update();
+    //for(auto &contact : contactList)
+    //    contact->update();
 
-    for(size_t i = 0; i < contactList.size()*2; ++i)
+    /*for(size_t i = 0; i < contactList.size()*2; ++i)
     {
         ContactPointPtr contact = findMostSevereCollisionContactInList(contactList);
         if(!contact)
             break;
         solveCollisionContactResponse(contact);
-    }
+    }*/
+   for(auto &contact : contactList)
+        solveCollisionContactResponse(contact);
 }
 
 void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
 {
+#if 0
 	// See Milling. 'Game Physics Engine Development'. Chapter 14 for details on these equations and the associated algorithms."
     auto firstCollisionObject = contact->firstCollisionObject;
     auto secondCollisionObject = contact->secondCollisionObject;
@@ -248,30 +251,31 @@ void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
 	if (secondCollisionObject->hasCollisionResponse())
         secondCollisionObject->applyImpulseAtRelativePosition(-contactImpulse, relativeSecondPoint);
 
-    /*// Are they already separating?
-    auto separatingSpeed = contact.separationSpeed();
+#else
+    // Are they already separating?
+    auto separatingSpeed = contact->separationSpeed();
     //printf("separationSpeed %f\n", separatingSpeed);
     if(separatingSpeed > 0)
         return;
 
-    auto restitution = std::min(contact.firstCollisionObject->getRestitutionCoefficient(), contact.secondCollisionObject->getRestitutionCoefficient());
+    auto restitution = std::min(contact->firstCollisionObject->getRestitutionCoefficient(), contact->secondCollisionObject->getRestitutionCoefficient());
     
     auto newSeparatingSpeed = -separatingSpeed*restitution;
     auto deltaSpeed = newSeparatingSpeed - separatingSpeed;
-    float inverseInertia = contact.inverseLinearInertia();
+    float inverseInertia = contact->inverseLinearInertia();
     if(inverseInertia <= 0)
         return;
 
     float impulse = deltaSpeed / inverseInertia;
-    Vector3 impulsePerIMass = contact.normal * impulse;
+    Vector3 impulsePerIMass = contact->normal * impulse;
 
-    contact.firstCollisionObject->applyLinearImpulse(impulsePerIMass);
-    contact.secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
+    contact->firstCollisionObject->applyLinearImpulse(impulsePerIMass);
+    contact->secondCollisionObject->applyLinearImpulse(-impulsePerIMass);
 
     //printf("restitution %f\n", restitution);
     //printf("inverseInertia %f\n", inverseInertia);
     //printf("impulse %f\n", impulse);
-    */
+#endif
 }
 
 void PhysicsWorld::solveCollisionContactConstraintList(const std::vector<ContactPointPtr> &contactList)
@@ -279,14 +283,16 @@ void PhysicsWorld::solveCollisionContactConstraintList(const std::vector<Contact
     if(contactList.empty())
         return;
 
-    for(size_t i = 0; i <contactList.size()*2; ++i)
+    /*for(size_t i = 0; i <contactList.size()*2; ++i)
     {
         ContactPointPtr nextPoint = findMostSeverePenetratingContactInList(contactList);
         if(!nextPoint)
             break;
 
         solveCollisionContactConstraint(nextPoint, 0.8f); 
-    }
+    }*/
+    for(auto &contact : contactList)
+        solveCollisionContactConstraint(contact, 0.8f);
 }
 
 void PhysicsWorld::solveCollisionContactConstraint(const ContactPointPtr &contact, float relaxationFactor)
