@@ -244,6 +244,7 @@ void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
     }
 
 	auto contactImpulse = contactLocalToWorldMatrix3x3 * contactLocalImpulse;
+    //printf("contactLocalImpulse %f %f %f\n", contactLocalImpulse.x, contactLocalImpulse.y, contactLocalImpulse.z);
 
 	if (firstCollisionObject->hasCollisionResponse())
         firstCollisionObject->applyImpulseAtRelativePosition(contactImpulse, relativeFirstPoint);

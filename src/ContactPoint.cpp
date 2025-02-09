@@ -1,5 +1,6 @@
 #include "uphysics/ContactPoint.hpp"
 #include "uphysics/CollisionObject.hpp"
+#include <stdio.h>
 
 namespace UPhysics
 {

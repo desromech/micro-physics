@@ -18,7 +18,7 @@ void RigidBody::integrateMovement(float delta)
 
 
     // integrate linear movement
-    linearAcceleration = netForce*inverseMass + ownerWorld->getGravity() + linearEngineAcceleration;
+    linearAcceleration = netForce*inverseMass + ownerWorld->getGravity() + linearInternalAcceleration;
     auto integratedVelocity = linearVelocity + linearAcceleration*delta;
     integratedVelocity *= pow(linearVelocityDamping, delta);
     linearVelocityIntegrationDelta = integratedVelocity - linearVelocity;

@@ -31,8 +31,13 @@ public:
     {
         inertiaTensor = collisionShape->computeInertiaTensorWithMass(mass);
         inverseInertiaTensor = inertiaTensor.inverse();
-        //inertiaTensor = Matrix3x3::zeros();
-        //inverseInertiaTensor = Matrix3x3::zeros();
+        computeWorldSpaceInertiaTensors();
+    }
+
+    void computeLinearOnlyMassDistribution()
+    {
+        inertiaTensor = Matrix3x3::zeros();
+        inverseInertiaTensor = Matrix3x3::zeros();
         computeWorldSpaceInertiaTensors();
     }
 
@@ -103,14 +108,14 @@ public:
         return angularVelocity;
     }
 
-    void setLinearEngineAcceleration(const Vector3 &newLinearEngineAcceleration)
+    void setInternalAcceleration(const Vector3 &newlinearInternalAcceleration)
     {
-        linearEngineAcceleration = newLinearEngineAcceleration;
+        linearInternalAcceleration = newlinearInternalAcceleration;
     }
 
-    const Vector3 &getLinearEngineAcceleration()
+    const Vector3 &getInternalAcceleration()
     {
-        return linearEngineAcceleration;
+        return linearInternalAcceleration;
     }
 
     virtual float computeAngularInertiaForRelativeContactPoint(const Vector3 &relativePoint, const Vector3 &normal) override
@@ -186,7 +191,7 @@ public:
 protected:
     float restitutionCoefficient = 0.1;
 
-    Vector3 linearEngineAcceleration = Vector3::zeros();
+    Vector3 linearInternalAcceleration = Vector3::zeros();
     Vector3 linearVelocity = Vector3::zeros();
     Vector3 linearAcceleration = Vector3::zeros();
     float linearVelocityDamping = 0.8;
