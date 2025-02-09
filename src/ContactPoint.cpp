@@ -46,7 +46,7 @@ float ContactPoint::closingSpeed() const
 }
 void ContactPoint::update()
 {
-    //computeWorldVersionWithTransforms(firstCollisionObject->getTransform(),  secondCollisionObject->getTransform());
+    computeWorldVersionWithTransforms(firstCollisionObject->getTransform(),  secondCollisionObject->getTransform());
 }
 
 void ContactPoint::computeLocalVersionsWithTransforms(const RigidTransform &firstTransform, const RigidTransform &secondTransform)
@@ -85,19 +85,18 @@ Matrix3x3 ContactPoint::computeContactSpaceMatrix() const
     return Matrix3x3(x, y, z);
 }
 
-ContactPoint ContactPoint::flipped() const
+ContactPointPtr ContactPoint::flipped() const
 {
-    auto result = *this;
-    result.firstCollisionObject = secondCollisionObject;
-    result.secondCollisionObject = firstCollisionObject;
-    result.normal = -normal;
-    result.firstPoint = secondPoint;
-    result.secondPoint = firstPoint;
-    result.isValid = isValid;
-    result.localFirstPoint = localSecondPoint;
-    result.localSecondPoint = localFirstPoint;
-    result.localFirstNormal = localSecondNormal;
-    result.localSecondNormal = localFirstNormal;
+    auto result = std::make_shared<ContactPoint> ();
+    result->firstCollisionObject = secondCollisionObject;
+    result->secondCollisionObject = firstCollisionObject;
+    result->normal = -normal;
+    result->firstPoint = secondPoint;
+    result->secondPoint = firstPoint;
+    result->localFirstPoint = localSecondPoint;
+    result->localSecondPoint = localFirstPoint;
+    result->localFirstNormal = localSecondNormal;
+    result->localSecondNormal = localFirstNormal;
     return result;
 }
 

@@ -494,7 +494,7 @@ GJKVoronoiSimplexSolver computeGJKSimplexFor(FirstSupportFunction firstObjectSup
 }
 
 template<typename FirstSupportFunction, typename SecondSupportFunction>
-ContactPoint samplePenetrationDistanceAndNormalForSupport(const FirstSupportFunction &firstSupport, const SecondSupportFunction &secondSupport, Vector3 startingDirectionHint = Vector3(1, 0, 0))
+ContactPointPtr samplePenetrationDistanceAndNormalForSupport(const FirstSupportFunction &firstSupport, const SecondSupportFunction &secondSupport, Vector3 startingDirectionHint = Vector3(1, 0, 0))
 {
     static const Vector3 RandomSamplingDistribution[] = {
         {-0.7071067811865476, 0.0, -0.7071067811865476},
@@ -551,30 +551,29 @@ ContactPoint samplePenetrationDistanceAndNormalForSupport(const FirstSupportFunc
         sampleBlock(direction);
 
     if (bestDistance < 0)
-        return ContactPoint{};
+        return nullptr;
 
     assert(!isnan(bestDistance));
     assert(!bestNormal.hasNaN());
     assert(!bestFirstPoint.hasNaN());
     assert(!bestSecondPoint.hasNaN());
 
-    ContactPoint result;
-    result.penetrationDistance = bestDistance;
-    result.normal = bestNormal;
-    result.firstPoint = bestFirstPoint;
-    result.secondPoint = bestSecondPoint;
-    result.isValid = true;
+    auto result = std::make_shared<ContactPoint> ();
+    result->penetrationDistance = bestDistance;
+    result->normal = bestNormal;
+    result->firstPoint = bestFirstPoint;
+    result->secondPoint = bestSecondPoint;
     return result;
 }
 template<typename FirstSupportFunction, typename SecondSupportFunction>
-ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSupport, const SecondSupportFunction &secondSupport, float margin, Vector3 startingDirectionHint = Vector3(1, 0, 0))
+ContactPointPtr samplePenetrationSupportContact(const FirstSupportFunction &firstSupport, const SecondSupportFunction &secondSupport, float margin, Vector3 startingDirectionHint = Vector3(1, 0, 0))
 {
     auto distanceAndNormals = samplePenetrationDistanceAndNormalForSupport(firstSupport, secondSupport, startingDirectionHint);
-    if(!distanceAndNormals.isValid)
-        return distanceAndNormals;
+    if(!distanceAndNormals)
+        return nullptr;
 
-    auto distance = distanceAndNormals.penetrationDistance;
-    auto normal = distanceAndNormals.normal;
+    auto distance = distanceAndNormals->penetrationDistance;
+    auto normal = distanceAndNormals->normal;
     
     float extraSeparation = 0.5;
     float distanceWithMargin = extraSeparation + distance + margin;
@@ -593,13 +592,12 @@ ContactPoint samplePenetrationSupportContact(const FirstSupportFunction &firstSu
 
     firstClosestPoint = firstClosestPoint - (normal * distanceWithMargin);
 
-    ContactPoint result;
-    result.requiredSeparation = margin;
-    result.penetrationDistance = correctedPenetrationDistance;
-    result.normal = normal;
-    result.firstPoint = firstClosestPoint;
-    result.secondPoint = secondClosestPoint;
-    result.isValid = true;
+    auto result = std::make_shared<ContactPoint> ();
+    result->requiredSeparation = margin;
+    result->penetrationDistance = correctedPenetrationDistance;
+    result->normal = normal;
+    result->firstPoint = firstClosestPoint;
+    result->secondPoint = secondClosestPoint;
     //result.computeWorldContactPointAndDistances();
     return result;
 

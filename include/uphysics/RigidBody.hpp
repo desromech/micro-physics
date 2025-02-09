@@ -31,6 +31,9 @@ public:
     {
         inertiaTensor = collisionShape->computeInertiaTensorWithMass(mass);
         inverseInertiaTensor = inertiaTensor.inverse();
+        //inertiaTensor = Matrix3x3::zeros();
+        //inverseInertiaTensor = Matrix3x3::zeros();
+        computeWorldSpaceInertTensors();
     }
 
     virtual float getMass() const override
@@ -51,11 +54,15 @@ public:
     virtual void transformChanged() override
     {
         CollisionObject::transformChanged();
+        computeWorldSpaceInertTensors();
+    }
 
+    void computeWorldSpaceInertTensors()
+    {
         rotationMatrix = transform.rotation.asMatrix3x3();
         auto transposedRotationMatrix = rotationMatrix.transposed();
         worldInertiaTensor = rotationMatrix * inertiaTensor * transposedRotationMatrix;
-	    worldInverseInertiaTensor = rotationMatrix * inverseInertiaTensor * transposedRotationMatrix;
+	    worldInverseInertiaTensor = rotationMatrix * inverseInertiaTensor * transposedRotationMatrix; 
     }
 
     virtual Vector3 computeVelocityAtRelativePoint(const Vector3 &relativePoint)

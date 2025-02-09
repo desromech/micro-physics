@@ -23,12 +23,12 @@ public:
     void computeNarrowPhaseContactsFromBroadphasePairs(const std::vector<std::pair<CollisionObjectPtr, CollisionObjectPtr> > &broadphasePairs );
     void detectNarrowPhaseCollisionOf(const CollisionObjectPtr &firstCollisionObject, const CollisionObjectPtr &secondCollisionObject);
     void resolveContactManifoldsCollisionsAndConstraints(const std::vector<ContactManifoldPtr> &manifolds);
-    void solveCollisionContactResponseList(std::vector<ContactPoint> &contactList);
-    void solveCollisionContactResponse(ContactPoint &contact);
-    void solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList);
-    void solveCollisionContactConstraint(ContactPoint &contact, float relaxationFactor);
-    ContactPoint *findMostSevereCollisionContactInList(std::vector<ContactPoint> &contactList);
-    ContactPoint *findMostSeverePenetratingContactInList(std::vector<ContactPoint> &contactList);
+    void solveCollisionContactResponseList(const std::vector<ContactPointPtr> &contactList);
+    void solveCollisionContactResponse(const ContactPointPtr &contact);
+    void solveCollisionContactConstraintList(const std::vector<ContactPointPtr> &contactList);
+    void solveCollisionContactConstraint(const ContactPointPtr &contact, float relaxationFactor);
+    ContactPointPtr findMostSevereCollisionContactInList(const std::vector<ContactPointPtr> &contactList);
+    ContactPointPtr findMostSeverePenetratingContactInList(const std::vector<ContactPointPtr> &contactList);
 
     void setGravity(const Vector3 &newGravity)
     {

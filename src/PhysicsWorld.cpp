@@ -102,22 +102,22 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
 
 }
 
-ContactPoint *PhysicsWorld::findMostSevereCollisionContactInList(std::vector<ContactPoint> &contactList)
+ContactPointPtr PhysicsWorld::findMostSevereCollisionContactInList(const std::vector<ContactPointPtr> &contactList)
 {
     if(contactList.empty())
         return nullptr;
 
-    ContactPoint *bestFound = nullptr;
+    ContactPointPtr bestFound = nullptr;
     float bestFoundClosingSpeed = -INFINITY;
 
     for(auto &contact : contactList)
     {
-        if(contact.hasCollisionResponse() && contact.inverseInertia() > 0.0)
+        if(contact->hasCollisionResponse() && contact->inverseInertia() > 0.0)
         {
-            auto closingSpeed = contact.closingSpeed();
+            auto closingSpeed = contact->closingSpeed();
             if (!bestFound || closingSpeed > bestFoundClosingSpeed)
             {
-                bestFound = &contact;
+                bestFound = contact;
                 bestFoundClosingSpeed = closingSpeed;
             }
         }
@@ -126,20 +126,20 @@ ContactPoint *PhysicsWorld::findMostSevereCollisionContactInList(std::vector<Con
 
 }
 
-ContactPoint *PhysicsWorld::findMostSeverePenetratingContactInList(std::vector<ContactPoint> &contactList)
+ContactPointPtr PhysicsWorld::findMostSeverePenetratingContactInList(const std::vector<ContactPointPtr> &contactList)
 {
     if(contactList.empty())
         return nullptr;
 
-    ContactPoint *bestFound = nullptr;
+    ContactPointPtr bestFound = nullptr;
     for (auto &contact : contactList)
     {
-        if(contact.hasCollisionResponse() && contact.inverseLinearInertia() > 0.0) 
+        if(contact->hasCollisionResponse() && contact->inverseLinearInertia() > 0.0) 
         {
-            contact.update();
-            if(!bestFound || contact.penetrationDistance > bestFound->penetrationDistance)
+            contact->update();
+            if(!bestFound || contact->penetrationDistance > bestFound->penetrationDistance)
             {
-                bestFound = &contact;
+                bestFound = contact;
             }
         }
     }
@@ -147,35 +147,35 @@ ContactPoint *PhysicsWorld::findMostSeverePenetratingContactInList(std::vector<C
 	return bestFound;
 }
 
-void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &contactList)
+void PhysicsWorld::solveCollisionContactResponseList(const std::vector<ContactPointPtr> &contactList)
 {
     if(contactList.empty())
         return;
 
     for(auto &contact : contactList)
-        contact.update();
+        contact->update();
 
     for(size_t i = 0; i < contactList.size()*2; ++i)
     {
-        ContactPoint *contact = findMostSevereCollisionContactInList(contactList);
+        ContactPointPtr contact = findMostSevereCollisionContactInList(contactList);
         if(!contact)
             break;
-        solveCollisionContactResponse(*contact);
+        solveCollisionContactResponse(contact);
     }
 }
 
-void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
+void PhysicsWorld::solveCollisionContactResponse(const ContactPointPtr &contact)
 {
 	// See Milling. 'Game Physics Engine Development'. Chapter 14 for details on these equations and the associated algorithms."
-    auto firstCollisionObject = contact.firstCollisionObject;
-    auto secondCollisionObject = contact.secondCollisionObject;
+    auto firstCollisionObject = contact->firstCollisionObject;
+    auto secondCollisionObject = contact->secondCollisionObject;
 
-    auto contactNormal = contact.normal;
+    auto contactNormal = contact->normal;
 
-    auto relativeFirstPoint = contact.relativeFirstPoint();
-    auto relativeSecondPoint = contact.relativeSecondPoint();
+    auto relativeFirstPoint = contact->relativeFirstPoint();
+    auto relativeSecondPoint = contact->relativeSecondPoint();
 
-    auto contactLocalToWorldMatrix3x3 = contact.computeContactSpaceMatrix();
+    auto contactLocalToWorldMatrix3x3 = contact->computeContactSpaceMatrix();
 
     auto velocityChangePerImpulseWorldMatrix = 
         firstCollisionObject->computeVelocityPerImpulseWorldMatrixForRelativeContactPoint(relativeFirstPoint)
@@ -272,40 +272,40 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
     //printf("inverseInertia %f\n", inverseInertia);
     //printf("impulse %f\n", impulse);
     */
-}   
+}
 
-void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)
+void PhysicsWorld::solveCollisionContactConstraintList(const std::vector<ContactPointPtr> &contactList)
 {
     if(contactList.empty())
         return;
 
     for(size_t i = 0; i <contactList.size()*2; ++i)
     {
-        ContactPoint *nextPoint = findMostSeverePenetratingContactInList(contactList);
+        ContactPointPtr nextPoint = findMostSeverePenetratingContactInList(contactList);
         if(!nextPoint)
             break;
 
-        solveCollisionContactConstraint(*nextPoint, 0.8f); 
+        solveCollisionContactConstraint(nextPoint, 0.8f); 
     }
 }
 
-void PhysicsWorld::solveCollisionContactConstraint(ContactPoint &contact, float relaxationFactor)
+void PhysicsWorld::solveCollisionContactConstraint(const ContactPointPtr &contact, float relaxationFactor)
 {
-    auto penetrationDistance = contact.penetrationDistance;
+    auto penetrationDistance = contact->penetrationDistance;
     //printf("penetrationDistance %f\n", penetrationDistance);
     if (penetrationDistance < 0)
         return;
 
-    auto inverseInertia = contact.inverseInertia();
+    auto inverseInertia = contact->inverseInertia();
     if(inverseInertia <= 0)
         return;
 
     auto penetrationDelta = penetrationDistance * relaxationFactor / inverseInertia;
-    if(contact.firstCollisionObject->hasCollisionResponse())
-        contact.firstCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact.relativeFirstPoint(),contact.normal);
+    if(contact->firstCollisionObject->hasCollisionResponse())
+        contact->firstCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact->relativeFirstPoint(), contact->normal);
 
-    if(contact.secondCollisionObject->hasCollisionResponse())
-        contact.secondCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact.relativeSecondPoint(), -contact.normal);
+    if(contact->secondCollisionObject->hasCollisionResponse())
+        contact->secondCollisionObject->applyMovementAtRelativePoint(penetrationDelta, contact->relativeSecondPoint(), -contact->normal);
 }
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)

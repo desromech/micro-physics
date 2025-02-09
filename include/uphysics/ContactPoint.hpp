@@ -13,6 +13,7 @@ namespace UPhysics
 {
     class CollisionObject;
     typedef struct std::shared_ptr<struct ContactManifold> ContactManifoldPtr;
+    typedef struct std::shared_ptr<struct ContactPoint> ContactPointPtr;
 
     struct ContactPoint
     {
@@ -28,7 +29,6 @@ namespace UPhysics
         Vector3 localFirstNormal = Vector3(0, 0, 0);
         Vector3 localSecondNormal = Vector3(0, 0, 0);
         uint32_t epoch = 0;
-        bool isValid = false;
 
         bool hasCollisionResponse() const;
         float inverseLinearInertia() const;
@@ -44,7 +44,7 @@ namespace UPhysics
         void computeWorldVersionWithTransforms(const RigidTransform &firstTransform, const RigidTransform &secondTransform);
         void computeWorldContactPointAndDistances();
         Matrix3x3 computeContactSpaceMatrix() const;
-        ContactPoint flipped() const;
+        ContactPointPtr flipped() const;
     };
 } // End of namespace Usgar
 

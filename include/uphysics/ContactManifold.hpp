@@ -15,23 +15,23 @@ namespace UPhysics
     typedef struct std::shared_ptr<struct ContactManifold> ContactManifoldPtr;
     struct ContactManifold
     {
-        static const size_t MaxContactPoints = 4;
+        static const size_t MaxContactPoints = 1;
 
-        ContactManifold flipped()
+        ContactManifoldPtr flipped()
         {
-            ContactManifold result;
-            result.contactList.reserve(contactList.size());
+            ContactManifoldPtr result;
+            result->contactList.reserve(contactList.size());
             for (size_t i = 0; i < contactList.size(); ++i)
-                result.contactList.push_back(contactList[i].flipped());
+                result->contactList.push_back(contactList[i]->flipped());
             return result; 
         }
 
-        void addPoint(const ContactPoint& contactPoint)
+        void addPoint(const ContactPointPtr& contactPoint)
         {
-            assert(!contactPoint.normal.hasNaN());
+            assert(!contactPoint->normal.hasNaN());
             contactList.push_back(contactPoint);
-            contactList.back().firstCollisionObject = firstCollisionObject.get();
-            contactList.back().secondCollisionObject = secondCollisionObject.get();
+            contactList.back()->firstCollisionObject = firstCollisionObject.get();
+            contactList.back()->secondCollisionObject = secondCollisionObject.get();
         }
 
         void setCollisionObjects(const CollisionObjectPtr &first, const CollisionObjectPtr &second)
@@ -40,8 +40,8 @@ namespace UPhysics
             secondCollisionObject = second;
             for(size_t i = 0; i < contactList.size(); ++i)
             {
-                contactList[i].firstCollisionObject = first.get();
-                contactList[i].secondCollisionObject = second.get();
+                contactList[i]->firstCollisionObject = first.get();
+                contactList[i]->secondCollisionObject = second.get();
             }
         }
 
@@ -55,9 +55,9 @@ namespace UPhysics
         {
             for(size_t i = 0; i < contactList.size() ; ++i)
             {
-                contactList[i].firstCollisionObject = firstCollisionObject.get();
-                contactList[i].secondCollisionObject = secondCollisionObject.get();
-                contactList[i].update();
+                contactList[i]->firstCollisionObject = firstCollisionObject.get();
+                contactList[i]->secondCollisionObject = secondCollisionObject.get();
+                contactList[i]->update();
             }
         }
 
@@ -69,7 +69,7 @@ namespace UPhysics
             size_t destPosition = 0;
             for(size_t i = 0; i < contactList.size(); ++i)
             {
-                bool isExpired = (-contactList[i].penetrationDistance > MaxSeparationTolerated) || contactList[i].epoch < expiredEpoch;
+                bool isExpired = (-contactList[i]->penetrationDistance > MaxSeparationTolerated) || contactList[i]->epoch < expiredEpoch;
                 if(!isExpired)
                     contactList[destPosition++] = contactList[i];
             }
@@ -81,7 +81,7 @@ namespace UPhysics
 
         Vector3 lastSeparatingAxis = Vector3(1, 0, 0);
         uint32_t epoch = 0;
-        std::vector<ContactPoint> contactList;
+        std::vector<ContactPointPtr> contactList;
     };
 
     class ContactManifoldCache
@@ -152,7 +152,7 @@ namespace UPhysics
             return newManifold;
         }
 
-        void insertContactsForWith(const std::vector<ContactPoint> &contacts, const CollisionObjectPtr &first, const CollisionObjectPtr &second)
+        void insertContactsForWith(const std::vector<ContactPointPtr> &contacts, const CollisionObjectPtr &first, const CollisionObjectPtr &second)
         {
             if(contacts.empty())
                 return;
@@ -161,7 +161,7 @@ namespace UPhysics
             for (auto &contact : contacts)
             {
                 auto insertedContact = contact;
-                insertedContact.epoch = epoch;
+                insertedContact->epoch = epoch;
                 manifold->addPoint(insertedContact);
                 manifold->epoch = epoch;
             }
