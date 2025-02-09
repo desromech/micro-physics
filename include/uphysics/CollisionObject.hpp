@@ -142,6 +142,30 @@ public:
         (void)movementDirection;
     }
 
+    virtual Vector3 velocityAtRelativePoint(const Vector3 &relativePoint)
+    {
+        return Vector3::zeros();
+    }
+
+    virtual Vector3 getLinearVelocityIntegrationDelta()
+    {
+        return Vector3::zeros();
+    }
+
+    virtual Matrix3x3 computeVelocityPerImpulseWorldMatrixForRelativeContactPoint(const Vector3 &relativePoint)
+    {
+        return Matrix3x3();
+    }
+    virtual float getStaticFrictionCoefficient()
+    {
+        return 0.6f;
+    }
+
+    virtual float getDynamicFrictionCoefficient()
+    {
+        return 0.5f;
+    }
+
     CollisionShapePtr collisionShape;
     PhysicsWorld *ownerWorld = nullptr;
 

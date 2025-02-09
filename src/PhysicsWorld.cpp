@@ -166,7 +166,89 @@ void PhysicsWorld::solveCollisionContactResponseList(std::vector<ContactPoint> &
 
 void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
 {
-    // Are they already separating?
+	// See Milling. 'Game Physics Engine Development'. Chapter 14 for details on these equations and the associated algorithms."
+    auto firstCollisionObject = contact.firstCollisionObject;
+    auto secondCollisionObject = contact.secondCollisionObject;
+
+    auto contactNormal = contact.normal;
+
+    auto relativeFirstPoint = contact.relativeFirstPoint();
+    auto relativeSecondPoint = contact.relativeSecondPoint();
+
+    auto contactLocalToWorldMatrix3x3 = contact.computeContactSpaceMatrix();
+
+    auto velocityChangePerImpulseWorldMatrix = 
+        firstCollisionObject->computeVelocityPerImpulseWorldMatrixForRelativeContactPoint(relativeFirstPoint)
+        + secondCollisionObject->computeVelocityPerImpulseWorldMatrixForRelativeContactPoint(relativeSecondPoint);
+
+    auto velocityChangePerImpulseContactMatrix = contactLocalToWorldMatrix3x3.transposed() * velocityChangePerImpulseWorldMatrix * contactLocalToWorldMatrix3x3;
+
+    auto inverseMass = firstCollisionObject->getMassReciprocal() + secondCollisionObject->getMassReciprocal();
+
+    velocityChangePerImpulseContactMatrix = velocityChangePerImpulseContactMatrix + Matrix3x3::scale(inverseMass);
+
+    if (velocityChangePerImpulseContactMatrix.determinant() == 0) return;
+
+	auto impulseChangePerVelocityContactMatrix = velocityChangePerImpulseContactMatrix.inverse();
+
+	auto firstContactVelocity = firstCollisionObject->velocityAtRelativePoint(relativeFirstPoint);
+	auto secondContactVelocity = secondCollisionObject->velocityAtRelativePoint(relativeSecondPoint);
+	
+	auto relativeSeparationVelocity = firstContactVelocity - secondContactVelocity;
+	
+	auto relativeContactSeparationVelocity = relativeSeparationVelocity * contactLocalToWorldMatrix3x3;
+	if(relativeContactSeparationVelocity.x > 0.0)
+        return;
+
+	auto relativeVelocityFromIntegrationDelta = firstCollisionObject->getLinearVelocityIntegrationDelta() - secondCollisionObject->getLinearVelocityIntegrationDelta();
+	auto relativeContactVelocityFromIntegrationDelta = relativeVelocityFromIntegrationDelta.dot(contactNormal);
+	
+	auto restitutionCoefficient = firstCollisionObject->getRestitutionCoefficient() * secondCollisionObject->getRestitutionCoefficient();
+	
+    const float restingContactVelocityLimit = 0.1;
+	// Resting contact: reduce contact velocity by acceleration only speed increase, and set the restitution coeffiecient to 0"
+	if (abs(relativeContactSeparationVelocity.x) < restingContactVelocityLimit)
+		restitutionCoefficient = 0.0;
+
+	auto deltaVelocity = -relativeContactSeparationVelocity.x - (restitutionCoefficient * (relativeContactSeparationVelocity.x - relativeContactVelocityFromIntegrationDelta));
+	
+	auto contactLocalVelocityChange = Vector3(deltaVelocity,
+		-relativeContactSeparationVelocity.y,
+		-relativeContactSeparationVelocity.z
+    );
+		
+	auto contactLocalImpulse = impulseChangePerVelocityContactMatrix * contactLocalVelocityChange;
+
+	// Compute the planar length for simulating friction.
+	auto staticFrictionCoefficient = std::min(firstCollisionObject->getStaticFrictionCoefficient(), secondCollisionObject->getStaticFrictionCoefficient());
+	auto planarImpulse = sqrt(contactLocalImpulse.y*contactLocalImpulse.y + contactLocalImpulse.z*contactLocalImpulse.z);
+
+	// Is this in the limits for the static friction?
+	if(planarImpulse > (contactLocalImpulse.x * staticFrictionCoefficient))
+    {
+		auto dynamicFrictionCoefficient = std::min(firstCollisionObject->getDynamicFrictionCoefficient(), secondCollisionObject->getDynamicFrictionCoefficient());
+		
+		contactLocalImpulse.y /= planarImpulse;
+		contactLocalImpulse.z /= planarImpulse;
+
+		//"contactLocalImpulse yz length = dynamicFrictionCoefficient * contactLocalImpulse x"
+		
+		//"CHECK ME: What is the meaning of this correction? [From Millington Game Physics Engine Development, Chapter 15 pp 410]"
+		auto frictionNormalDelta = velocityChangePerImpulseContactMatrix.firstRow().dot(Vector3(1, dynamicFrictionCoefficient*contactLocalImpulse.y, dynamicFrictionCoefficient*contactLocalImpulse.z));
+		contactLocalImpulse.x = deltaVelocity / frictionNormalDelta;
+
+		contactLocalImpulse.y = contactLocalImpulse.y * dynamicFrictionCoefficient * contactLocalImpulse.x;
+		contactLocalImpulse.z = contactLocalImpulse.z * dynamicFrictionCoefficient * contactLocalImpulse.x;
+    }
+
+	auto contactImpulse = contactLocalToWorldMatrix3x3 * contactLocalImpulse;
+
+	if (firstCollisionObject->hasCollisionResponse())
+        firstCollisionObject->applyImpulseAtRelativePosition(contactImpulse, relativeFirstPoint);
+	if (secondCollisionObject->hasCollisionResponse())
+        secondCollisionObject->applyImpulseAtRelativePosition(-contactImpulse, relativeSecondPoint);
+
+    /*// Are they already separating?
     auto separatingSpeed = contact.separationSpeed();
     //printf("separationSpeed %f\n", separatingSpeed);
     if(separatingSpeed > 0)
@@ -189,6 +271,7 @@ void PhysicsWorld::solveCollisionContactResponse(ContactPoint &contact)
     //printf("restitution %f\n", restitution);
     //printf("inverseInertia %f\n", inverseInertia);
     //printf("impulse %f\n", impulse);
+    */
 }   
 
 void PhysicsWorld::solveCollisionContactConstraintList(std::vector<ContactPoint> &contactList)

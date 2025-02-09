@@ -75,8 +75,14 @@ public:
 
     virtual void applyImpulseAtRelativePosition(Vector3 impulse, Vector3 relativePosition)
     {
-        (void)relativePosition;
-        applyLinearImpulse(impulse);
+        linearVelocity += (impulse*inverseMass);
+        angularVelocity += (worldInverseInertiaTensor * relativePosition.cross(impulse));
+        checkWakeUpDueToExternalImpulse();
+    }
+
+    void checkWakeUpDueToExternalImpulse()
+    {
+        // TODO: Implement this.
     }
 
     virtual void applyMovePerMass(Vector3 movement)
@@ -112,6 +118,19 @@ public:
         auto torquePerUnitImpulse = relativePoint.cross(normal);
         auto rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
         return rotationPerUnitImpulse.cross(relativePoint).dot(normal);
+    }
+
+    virtual Matrix3x3 computeVelocityPerImpulseWorldMatrixForRelativeContactPoint(const Vector3 &relativePoint)
+    {
+        auto relativePointCrossMatrix = Matrix3x3::skewSymmetric(relativePoint);
+        auto torquePerUnitImpulse = relativePointCrossMatrix;
+        auto rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
+        return -(relativePointCrossMatrix * rotationPerUnitImpulse);
+    }
+
+    virtual Vector3 velocityAtRelativePoint(const Vector3 &relativePoint)
+    {
+        return linearVelocity + angularVelocity.cross(relativePoint);
     }
 
     void wakeUpForTranslationBy(const Vector3 &translation)
@@ -158,6 +177,12 @@ public:
         wakeUpForTranslationByAndRotateByAngularIncrement(movementDirection * linearMovement, angularDirection*angularMovement);
     }
 
+
+    virtual Vector3 getLinearVelocityIntegrationDelta() override
+    {
+        return linearVelocityIntegrationDelta;
+    }
+
 protected:
     float restitutionCoefficient = 0.1;
 
@@ -165,6 +190,7 @@ protected:
     Vector3 linearVelocity = Vector3::zeros();
     Vector3 linearAcceleration = Vector3::zeros();
     float linearVelocityDamping = 0.8;
+    Vector3 linearVelocityIntegrationDelta = Vector3::zeros();
     Vector3 netForce = Vector3::zeros();
 
     Vector3 angularVelocity = Vector3::zeros();
