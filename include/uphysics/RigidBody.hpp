@@ -92,13 +92,6 @@ public:
         // TODO: Implement this.
     }
 
-    virtual void applyMovePerMass(Vector3 movement)
-    {
-        auto delta = movement * inverseMass;
-        assert(!delta.hasNaN());
-        setPosition(getPosition() + delta);
-    }
-
     virtual Vector3 getLinearVelocity() const override
     {
         return linearVelocity;

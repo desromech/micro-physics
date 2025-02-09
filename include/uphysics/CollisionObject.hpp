@@ -59,11 +59,6 @@ public:
         applyLinearImpulse(impulse);
     }
 
-    virtual void applyMovePerMass(Vector3 movement)
-    {
-        (void)movement;
-    }
-
     virtual bool needsCollisionDetection() const
     {
         return false;
