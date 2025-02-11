@@ -123,6 +123,8 @@ public:
     void setInternalAcceleration(const Vector3 &newlinearInternalAcceleration)
     {
         linearInternalAcceleration = newlinearInternalAcceleration;
+        if(linearInternalAcceleration.length2() > 0.01)
+            wakeUp();
     }
 
     const Vector3 &getInternalAcceleration()
