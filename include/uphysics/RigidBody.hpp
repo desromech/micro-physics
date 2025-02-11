@@ -8,6 +8,9 @@ namespace UPhysics
 class RigidBody : public CollisionObject
 {
 public:
+    static constexpr float SleepingMovementThreshold = 0.01;
+    static constexpr float WakeUpMovementDeltaTreshold = 0.001;
+
     RigidBody();
     virtual ~RigidBody() override;
 
@@ -56,6 +59,14 @@ public:
         return restitutionCoefficient;
     }
 
+    void checkTimeToSleep(float weight);
+    void setSleepingStateFactors();
+
+    float computeMovementAmount()
+    {
+        return linearVelocity.length2() + angularVelocity.length2();
+    }
+
     virtual void transformChanged() override
     {
         CollisionObject::transformChanged();
@@ -94,7 +105,8 @@ public:
 
     void checkWakeUpDueToExternalImpulse()
     {
-        // TODO: Implement this.
+        if(computeMovementAmount() > SleepingMovementThreshold)
+            wakeUp();
     }
 
     virtual Vector3 getLinearVelocity() const override
@@ -138,9 +150,21 @@ public:
         return linearVelocity + angularVelocity.cross(relativePoint);
     }
 
+    virtual bool isAwake() const override
+    {
+        return isAwake_;
+    }
+
+    virtual void resetSleepingState() override
+    {
+        isAwake_ = false;
+    }
+
+    virtual void wakeUp() override;
+
     void wakeUpForTranslationBy(const Vector3 &translation)
     {
-        // TODO: wakeup
+        wakeUp();
         setPosition(getPosition() + translation);
     }
 
@@ -152,7 +176,14 @@ public:
 
     void wakeUpForTranslationByAndRotateByAngularIncrement(const Vector3 &linearIncrement, const Vector3 &angularIncrement)
     {
-        // TODO: wakeup
+        if(!isAwake())
+        {
+            float movementAmount = linearIncrement.length2() + angularIncrement.length2();
+            if(movementAmount < WakeUpMovementDeltaTreshold)
+                return;
+            wakeUp();
+        }
+        
         translateByAndRotateByIncrement(linearIncrement, angularIncrement);
     }
 
@@ -190,6 +221,7 @@ public:
 
 protected:
     float restitutionCoefficient = 0.1;
+    bool isAwake_ = false;
 
     Vector3 linearInternalAcceleration = Vector3::zeros();
     Vector3 linearVelocity = Vector3::zeros();
@@ -202,6 +234,8 @@ protected:
     Vector3 angularAcceleration = Vector3::zeros();
     float angularVelocityDamping = 0.8;
     Vector3 netTorque = Vector3::zeros();
+
+    float averageMovementAmount = 0;
 
     float mass = 0.0f;
     float inverseMass = 0.0f;

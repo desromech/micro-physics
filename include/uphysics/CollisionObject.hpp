@@ -12,7 +12,7 @@ typedef std::shared_ptr<class CollisionShape> CollisionShapePtr;
 
 class PhysicsWorld;
 
-class CollisionObject
+class CollisionObject : public std::enable_shared_from_this<CollisionObject>
 {
 public:
     CollisionObject();
@@ -26,6 +26,16 @@ public:
     virtual bool hasCollisionResponse() const
     {
         return false;
+    }
+
+    virtual bool isAwake() const
+    {
+        return false;
+    }
+
+    bool isSleeping() const
+    {
+        return !isAwake();
     }
 
     virtual float getMass() const
@@ -62,6 +72,16 @@ public:
     virtual bool needsCollisionDetection() const
     {
         return false;
+    }
+
+    virtual void resetSleepingState ()
+    {
+        // Do nothing here
+    }
+
+    virtual void wakeUp()
+    {
+        // Do nothing here
     }
 
     uint32_t getID()

@@ -11,11 +11,33 @@ RigidBody::~RigidBody()
 {
 }
 
+void RigidBody::checkTimeToSleep(float weight)
+{
+    if(isSleeping())
+        return;
+    
+    auto movementAmount = computeMovementAmount();
+    averageMovementAmount = mix(averageMovementAmount, movementAmount, weight);
+
+    if(averageMovementAmount <= SleepingMovementThreshold)
+        setSleepingStateFactors();
+}
+
+void RigidBody::setSleepingStateFactors()
+{
+    isAwake_ = false;
+    angularVelocity = Vector3::zeros();
+    linearVelocity = Vector3::zeros();
+    linearVelocityIntegrationDelta = Vector3::zeros();
+    netForce = Vector3::zeros();
+    netTorque = Vector3::zeros();
+}
+
 void RigidBody::integrateMovement(float delta)
 {
     if(!ownerWorld)
         return;
-
+    assert(isAwake_);
 
     // integrate linear movement
     linearAcceleration = netForce*inverseMass + ownerWorld->getGravity() + linearInternalAcceleration;
@@ -42,6 +64,18 @@ void RigidBody::integrateMovement(float delta)
 
     netForce = Vector3::zeros();
     netTorque = Vector3::zeros();
+}
+
+void RigidBody::wakeUp()
+{
+    if(isAwake_) return;
+    if(inverseMass == 0) return;
+
+    isAwake_ = true;
+    averageMovementAmount = 2.0f;
+    if(ownerWorld)
+        ownerWorld->addAwakeRigidBody(std::static_pointer_cast<RigidBody> (shared_from_this()));
+    
 }
 
 } // End of namespace UPhysics

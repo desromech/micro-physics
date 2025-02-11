@@ -8,6 +8,7 @@
 namespace UPhysics
 {
 typedef std::shared_ptr<class PhysicsWorld> PhysicsWorldPtr;
+typedef std::shared_ptr<class RigidBody> RigidBodyPtr;
 
 class PhysicsWorld
 {
@@ -30,6 +31,8 @@ public:
     ContactPointPtr findMostSevereCollisionContactInList(const std::vector<ContactPointPtr> &contactList);
     ContactPointPtr findMostSeverePenetratingContactInList(const std::vector<ContactPointPtr> &contactList);
 
+    void addAwakeRigidBody(const RigidBodyPtr &RigidBody);
+
     void setGravity(const Vector3 &newGravity)
     {
         gravity = newGravity;
@@ -40,15 +43,7 @@ public:
         return gravity;
     }
 
-    void addCollisionObject(const CollisionObjectPtr &collisionObject)
-    {
-        if(collisionObject->ownerWorld == this)
-            return;
-
-        collisionObject->ownerWorld = this;
-        collisionObjects.push_back(collisionObject);
-    }
-
+    void addCollisionObject(const CollisionObjectPtr &collisionObject);
     void removeCollisionObject(const CollisionObjectPtr &collisionObject)
     {
         auto it = collisionObjects.begin();
@@ -65,6 +60,7 @@ public:
 private:
     Vector3 gravity = Vector3(0, -9.8, 0);
     std::vector<CollisionObjectPtr> collisionObjects;
+    std::vector<RigidBodyPtr> awakeRigidBodies;
     ContactManifoldCache contactManifoldCache;
 };
 } // End of namespace UPhysics

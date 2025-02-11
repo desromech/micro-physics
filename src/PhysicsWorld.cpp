@@ -1,8 +1,21 @@
 #include "uphysics/PhysicsWorld.hpp"
+#include "uphysics/RigidBody.hpp"
 #include <stdio.h>
 
 namespace UPhysics
 {
+
+void PhysicsWorld::addCollisionObject(const CollisionObjectPtr &collisionObject)
+{
+    if(collisionObject->ownerWorld == this)
+        return;
+
+    collisionObject->ownerWorld = this;
+    collisionObjects.push_back(collisionObject);
+
+    collisionObject->resetSleepingState();
+    collisionObject->wakeUp();
+}
 
 void PhysicsWorld::evaluateForceGeneratorWithDeltaTime(float deltaTimestep)
 {
@@ -10,10 +23,17 @@ void PhysicsWorld::evaluateForceGeneratorWithDeltaTime(float deltaTimestep)
 }
 void PhysicsWorld::integrateMovementWithDeltaTime(float deltaTimestep)
 {
+    printf("Integrate %zu awake rigid bodies.\n", awakeRigidBodies.size());
+
     // Integrate
-    for (auto &object : collisionObjects)
+    for (auto &object : awakeRigidBodies)
         object->integrateMovement(deltaTimestep);
     
+}
+
+void PhysicsWorld::addAwakeRigidBody(const RigidBodyPtr &rigidBody)
+{
+    awakeRigidBodies.push_back(rigidBody);
 }
 
 void PhysicsWorld::detectAndResolveCollisionsWithDeltaTime(float deltaTimestep)
@@ -79,20 +99,12 @@ void PhysicsWorld::resolveContactManifoldsCollisionsAndConstraints(const std::ve
     if(manifolds.empty())
         return;
     
-    //printf("Manifolds to solve: %zu\n", manifolds.size());
-    /*std::vector<ContactPoint> contactList;
-    for(auto &manifold : manifolds)
-    {
-        if(manifold->hasCollisionResponse())
-        {
-            contactList.insert(contactList.end(), manifold->points.begin(), manifold->points.begin() + manifold->size);
-        }
-    }*/
+    // TODO: Check for manifold islands.
 
     for(auto &manifold : manifolds)
     {
         if(!manifold->hasCollisionResponse())
-            continue;;
+            continue;
 
         solveCollisionContactResponseList(manifold->contactList);
         solveCollisionContactConstraintList(manifold->contactList);
@@ -316,7 +328,20 @@ void PhysicsWorld::solveCollisionContactConstraint(const ContactPointPtr &contac
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)
 {
-    
+    static const float tau = 0.15;
+    auto weight = exp(-tau*deltaTimestep)*tau;
+    for(auto &rigidBody : awakeRigidBodies)
+        rigidBody->checkTimeToSleep(weight);
+
+    size_t destIndex = 0;
+    for(size_t i = 0; i <awakeRigidBodies.size(); ++i)
+    {
+        auto body = awakeRigidBodies[i];
+        if(body->isAwake())
+            awakeRigidBodies[destIndex++] = body;
+    }
+
+    awakeRigidBodies.resize(destIndex);
 }
 
 void PhysicsWorld::updateTimestep(float deltaTimestep)
