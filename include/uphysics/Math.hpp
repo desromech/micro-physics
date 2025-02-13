@@ -25,6 +25,11 @@ namespace UPhysics
             return 1;
         return 0;
     }
+
+    inline float safeNumberReciprocal(float x)
+    {
+        return x == 0 ? 0.0f : 1.0f / x;
+    }
 } // End of namespace UPhysics
 
 #endif //UPHYSICS_MATH_HPP

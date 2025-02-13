@@ -174,6 +174,7 @@ public:
     {
         transform.translation += linearIncrement;
         //transform.rotation = Quaternion(angularIncrement*0.5).exp() * transform.rotation;
+        transformChanged();
     }
 
     void wakeUpForTranslationByAndRotateByAngularIncrement(const Vector3 &linearIncrement, const Vector3 &angularIncrement)

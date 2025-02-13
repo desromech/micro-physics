@@ -102,6 +102,11 @@ struct alignas(16) Vector3
         return *this / length();
     }
 
+    Vector3 safeReciprocal() const
+    {
+        return Vector3(safeNumberReciprocal(x), safeNumberReciprocal(y), safeNumberReciprocal(z));
+    }
+
     Vector2 xy() const
     {
         return Vector2(x, y);

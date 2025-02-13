@@ -4,11 +4,18 @@
 #include "uphysics/RigidTransform.hpp"
 #include "uphysics/CollisionShape.hpp"
 #include <memory>
+#include <optional>
+
 namespace UPhysics
 {
 
 typedef std::shared_ptr<class CollisionObject> CollisionObjectPtr;
 typedef std::shared_ptr<class CollisionShape> CollisionShapePtr;
+
+struct ObjectRayCastingResult : ShapeRayCastingResult
+{
+    CollisionObjectPtr object;
+};
 
 class PhysicsWorld;
 
@@ -179,6 +186,21 @@ public:
     virtual float getDynamicFrictionCoefficient()
     {
         return 0.5f;
+    }
+
+    std::optional<ObjectRayCastingResult> rayCast(const Ray &ray)
+    {
+        auto localRay = ray.inverseTransformedWith(transform);
+        auto localRayResult = collisionShape->rayCast(localRay);
+        if(!localRayResult)
+            return std::nullopt;
+
+        ObjectRayCastingResult result = {};
+        result.distance = localRayResult->distance;
+        result.normal = transform.transformNormal(localRayResult->normal);
+        result.shape = localRayResult->shape;
+        result.object = shared_from_this();
+        return result;
     }
 
     CollisionShapePtr collisionShape;

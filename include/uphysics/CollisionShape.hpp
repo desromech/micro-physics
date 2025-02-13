@@ -4,8 +4,10 @@
 #include "Vector3.hpp"
 #include "AABox3.hpp"
 #include "ContactPoint.hpp"
+#include "uphysics/Ray.hpp"
 #include <vector>
 #include <memory>
+#include <optional>
 
 namespace UPhysics
 {
@@ -14,6 +16,13 @@ typedef std::shared_ptr<class CollisionShape> CollisionShapePtr;
 typedef std::shared_ptr<class ConvexCollisionShape> ConvexCollisionShapePtr;
 typedef std::shared_ptr<class CompoundCollisionShape> CompoundCollisionShapePtr;
 
+struct ShapeRayCastingResult
+{
+    CollisionShapePtr shape;
+    float distance;
+    Vector3 normal;
+};
+
 class CollisionShape : public std::enable_shared_from_this<CollisionShape>
 {
 public:
@@ -21,6 +30,8 @@ public:
     {
         return false;
     }
+
+    virtual std::optional<ShapeRayCastingResult> rayCast(const Ray &ray);
 
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint);
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint);
@@ -64,6 +75,8 @@ public:
     {
         return Vector3::zeros();
     }
+
+    virtual std::optional<ShapeRayCastingResult> rayCast(const Ray &ray) override;
 
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;

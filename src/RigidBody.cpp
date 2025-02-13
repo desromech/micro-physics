@@ -1,5 +1,6 @@
 #include "uphysics/RigidBody.hpp"
 #include "uphysics/PhysicsWorld.hpp"
+#include <stdio.h>
 
 namespace UPhysics
 {
@@ -18,6 +19,7 @@ void RigidBody::checkTimeToSleep(float weight)
     
     auto movementAmount = computeMovementAmount();
     averageMovementAmount = mix(averageMovementAmount, movementAmount, weight);
+    printf("weight %f movement %f -> averageMovementAmount %f\n", weight, movementAmount, averageMovementAmount);
 
     if(averageMovementAmount <= SleepingMovementThreshold)
         setSleepingStateFactors();

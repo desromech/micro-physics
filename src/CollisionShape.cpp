@@ -5,6 +5,11 @@
 namespace UPhysics
 {
 
+std::optional<ShapeRayCastingResult> CollisionShape::rayCast(const Ray &ray)
+{
+    return std::nullopt;
+}
+
 std::vector<ContactPointPtr> CollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPointPtr>{};
@@ -18,6 +23,21 @@ std::vector<ContactPointPtr> CollisionShape::detectAndComputeCollisionContactPoi
 std::vector<ContactPointPtr> CollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPointPtr>{};
+}
+
+std::optional<ShapeRayCastingResult> ConvexCollisionShape::rayCast(const Ray &ray)
+{
+    auto gjkResult = gjkRayCast(ray, [=](const Vector3 &D){
+        return this->localSupportFunction(D);
+    });
+    if(!gjkResult)
+        return std::nullopt;
+    
+    ShapeRayCastingResult result = {};
+    result.distance = gjkResult->distance;
+    result.normal = gjkResult->normal;
+    result.shape = shared_from_this();
+    return result;
 }
 
 std::vector<ContactPointPtr> ConvexCollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)

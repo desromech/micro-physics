@@ -3,9 +3,11 @@
 
 #include "Vector3.hpp"
 #include "Math.hpp"
+#include "Ray.hpp"
 #include "ContactPoint.hpp"
 #include <assert.h>
 #include <stdint.h>
+#include <optional>
 
 namespace UPhysics
 {
@@ -381,9 +383,32 @@ public:
         }
     }
 
+    template<typename FT>
+    void transformPointsWith(const FT &transform)
+    {
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            points[i] = transform(points[i]);
+            firstPoints[i] = transform(firstPoints[i]);
+            secondPoints[i] = transform(secondPoints[i]);
+        }
+        invalidateCache();
+    }
+
     bool containsOrigin()
     {
         return computeClosesPointToOrigin().closeTo(Vector3(0, 0, 0));
+    }
+
+    bool containsPoint(const Vector3 &pointToTest)
+    {
+        for(auto &p : points)
+        {
+            if(p.closeTo(pointToTest))
+                return true;
+        }
+
+        return false;
     }
 
     void insertPoint(Vector3 point)
@@ -601,6 +626,81 @@ ContactPointPtr samplePenetrationSupportContact(const FirstSupportFunction &firs
     //result.computeWorldContactPointAndDistances();
     return result;
 
+}
+
+struct GJKRayCastResult
+{
+    float distance;        
+    Vector3 normal;
+};
+
+template<typename SupportFunction>
+std::optional<GJKRayCastResult> gjkRayCast(const Ray &ray, const SupportFunction &supportFunction)
+{
+    const int MaxNumberOfIterations = 32;
+    const float Epsilon2 =1.0e-10;
+
+    // Algorithm from 'Ray Casting against General Convex Objectswith Application to Continuous CollisionDetection' by G. Van Den Bergen.
+	auto lambda = ray.tmin;
+	auto lambdaMax = ray.tmax;
+	auto s = ray.origin;
+	auto r = ray.direction;
+	auto x = s + (r * lambda);
+	auto n = Vector3::zeros();
+
+	// Code for testing the convex cast.
+
+	Vector3 v = x - supportFunction(-r);
+	auto simplex = GJKVoronoiSimplexSolver();
+	auto remainingIterations = MaxNumberOfIterations;
+
+    while(remainingIterations > 0 && v.length2() > Epsilon2)
+    {
+        if (lambda > lambdaMax)
+            return std::nullopt;
+
+        auto p = supportFunction(v);
+        auto w = x - p;
+        auto VdotW = v.dot(w);
+
+        if(VdotW > 0)
+        {
+            auto VdotR = v.dot(r);
+			if(VdotR >= -Epsilon2)
+                return std::nullopt;
+
+			lambda = lambda - (VdotW / VdotR);
+			if(lambda > lambdaMax)
+                return std::nullopt;
+
+			auto oldX = x;
+			x = s + (r * lambda);
+			n = v;
+			w = x - p;
+			auto deltaX = x - oldX;
+			simplex.transformPointsWith([&](const Vector3 &simplexPoint) {
+                return simplexPoint + deltaX;
+            });
+
+			if (simplex.containsOrigin()) 
+                return GJKRayCastResult{lambda, n};
+			simplex.reduce();
+        }
+        if(!simplex.containsPoint(w))
+            simplex.insertPoint(w);
+
+        if(simplex.containsOrigin())
+        {
+            remainingIterations = 0;
+        }
+        else
+        {
+            v = simplex.computeClosesPointToOrigin();
+            --remainingIterations;
+        }
+    }
+
+    return GJKRayCastResult{lambda, n};
 }
 
 } // End of namespace UPhysics

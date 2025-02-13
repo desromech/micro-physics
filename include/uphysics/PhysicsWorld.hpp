@@ -4,6 +4,7 @@
 
 #include "CollisionObject.hpp"
 #include "ContactManifold.hpp"
+#include "Ray.hpp"
 
 namespace UPhysics
 {
@@ -31,6 +32,43 @@ public:
     ContactPointPtr findMostSevereCollisionContactInList(const std::vector<ContactPointPtr> &contactList);
     ContactPointPtr findMostSeverePenetratingContactInList(const std::vector<ContactPointPtr> &contactList);
 
+    template<typename FT>
+    std::optional<ObjectRayCastingResult> rayCastForFirstThat(const Ray &ray, const FT &aPredicate)
+    {
+        std::optional<ObjectRayCastingResult> bestResult;
+
+        for(size_t i = 0; i < collisionObjects.size(); ++i)
+        {
+            if(!aPredicate(collisionObjects))
+                continue;
+
+            auto result = collisionObjects[i]->rayCast(ray);
+            if(!result)
+                continue;
+
+            if(!bestResult || bestResult->distance > result->distance)
+                bestResult = result;
+        }
+
+        return bestResult;
+    }
+
+    std::optional<ObjectRayCastingResult> rayCast(const Ray &ray)
+    {
+        std::optional<ObjectRayCastingResult> bestResult;
+
+        for(size_t i = 0; i < collisionObjects.size(); ++i)
+        {
+            auto result = collisionObjects[i]->rayCast(ray);
+            if(!result)
+                continue;
+
+            if(!bestResult || bestResult->distance > result->distance)
+                bestResult = result;
+        }
+
+        return bestResult;
+    }
     void addAwakeRigidBody(const RigidBodyPtr &RigidBody);
 
     void setGravity(const Vector3 &newGravity)
