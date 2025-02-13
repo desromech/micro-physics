@@ -6,6 +6,7 @@
 #include "AABox3.hpp"
 #include "Plane.hpp"
 #include "Ray.hpp"
+#include "RigidTransform.hpp"
 
 namespace UPhysics
 {
@@ -76,12 +77,13 @@ struct Frustum
     Ray rayForNormalizedPoint(const Vector2 &normalizedPoint)
     {
         auto nearPoint = normalizedPointInNearPlane(normalizedPoint);
-        auto farPoint = normalizedPointInNearPlane(normalizedPoint);
+        auto farPoint = normalizedPointInFarPlane(normalizedPoint);
         return Ray::fromTo(nearPoint, farPoint);
     }
 
 	Frustum splitAtNearAndFarLambda(float nearLambda, float farLambda);
 	Frustum transformedWith(const Matrix4x4 &transform);
+    Frustum transformedWith(const RigidTransform &transform);
     Plane planes[6];
 };
 } // End of namespace UPhysics

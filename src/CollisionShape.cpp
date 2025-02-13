@@ -1,5 +1,6 @@
 #include "uphysics/CollisionShape.hpp"
 #include "uphysics/GJK.hpp"
+#include "uphysics/Sphere.hpp"
 #include <stdio.h>
 
 namespace UPhysics
@@ -23,6 +24,44 @@ std::vector<ContactPointPtr> CollisionShape::detectAndComputeCollisionContactPoi
 std::vector<ContactPointPtr> CollisionShape::detectAndComputeCollisionContactPointsWithCompoundShape(const RigidTransform &firstTransform, const CompoundCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)
 {
     return std::vector<ContactPointPtr>{};
+}
+
+std::optional<ShapeRayCastingResult> BoxCollisionShape::rayCast(const Ray &ray)
+{
+#if 1
+    return ConvexCollisionShape::rayCast(ray);
+#else
+    auto boxToTest = AABox3(-halfExtent, halfExtent);
+    auto intersectionResult = boxToTest.intersectionWithRay(ray);
+    if(!intersectionResult)
+        return std::nullopt;
+
+    Vector3 intersectionPoint = ray.pointAtDistance(*intersectionResult);
+    Vector3 normal = boxToTest.computePenetrationNormalAtPoint(intersectionPoint);
+
+    ShapeRayCastingResult result = {};
+    result.distance = *intersectionResult;
+    result.normal = normal;
+    result.shape = shared_from_this();
+    return result;
+#endif
+}
+
+std::optional<ShapeRayCastingResult> SphereCollisionShape::rayCast(const Ray &ray)
+{
+    auto sphereToTest = Sphere{radius, Vector3::zeros()};
+    auto intersectionResult = sphereToTest.intersectionWithRay(ray);
+    if(!intersectionResult)
+        return std::nullopt;
+
+    Vector3 intersectionPoint = ray.pointAtDistance(*intersectionResult);
+    Vector3 normal = (intersectionPoint - sphereToTest.center).safeNormalized();
+
+    ShapeRayCastingResult result = {};
+    result.distance = *intersectionResult;
+    result.normal = normal;
+    result.shape = shared_from_this();
+    return result;
 }
 
 std::optional<ShapeRayCastingResult> ConvexCollisionShape::rayCast(const Ray &ray)
@@ -104,6 +143,22 @@ void CompoundCollisionShape::addElement(const RigidTransform &transform, Collisi
     elements.push_back(element);
     localBoundingBox.insertBox(element.shape->localBoundingBox);
     localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
+}
+
+std::optional<ShapeRayCastingResult> CompoundCollisionShape::rayCast(const Ray &ray)
+{
+    std::optional<ShapeRayCastingResult> bestFound;
+    for(const auto & element : elements)
+    {
+        auto shapeLocalRay = ray.inverseTransformedWith(element.transform);
+        auto shapeResult = element.shape->rayCast(shapeLocalRay);
+        if(shapeResult)
+        {
+            if(!bestFound || shapeResult->distance < bestFound->distance)
+                bestFound = shapeResult;
+        }
+    }
+    return bestFound;
 }
 
 std::vector<ContactPointPtr> CompoundCollisionShape::detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint)

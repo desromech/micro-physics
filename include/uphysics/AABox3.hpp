@@ -4,7 +4,9 @@
 #include "Vector3.hpp"
 #include "TRSTransform.hpp"
 #include "RigidTransform.hpp"
+#include "Ray.hpp"
 #include <vector>
+#include <optional>
 
 namespace UPhysics
 {
@@ -137,6 +139,62 @@ struct AABox3
         });
 
         return result;
+    }
+
+    Vector3 computePenetrationNormalAtPoint(Vector3 point)
+    {
+        return computePenetrationNormalAndDistanceForPoint(point).first;
+    }
+
+    std::pair<Vector3, float> computePenetrationNormalAndDistanceForPoint(Vector3 point)
+    {
+        auto delta = point - center();
+        auto deltaAbsolute = delta.abs()/ halfExtent();
+        Vector3 normal{};
+
+        if(deltaAbsolute.x >= deltaAbsolute.y) 
+        {
+            if(deltaAbsolute.x >= deltaAbsolute.z)
+            {
+                normal = Vector3(sign(delta.x));
+            }
+            else
+            {
+                normal = Vector3(0, 0, sign(delta.x));
+            }
+        } 
+        else
+        {
+            if(deltaAbsolute.y >= deltaAbsolute.z)
+            {
+                normal =Vector3(0, sign(delta.y), 0);
+            }
+            else
+            {
+                normal =Vector3(0, 0, sign(delta.z));
+            }
+        }
+
+        float penetrationDistance = abs((delta - (halfExtent()*normal)).dot(normal));
+
+        return std::make_pair(normal, penetrationDistance);
+    }
+
+    std::optional<float> intersectionWithRay(const Ray &ray)
+    {
+        // Slab testing algorithm from: A Ray-Box Intersection Algorithm andEfficient Dynamic Voxel Rendering. By Majercik et al"
+        auto t0 = (min - ray.origin)*ray.inverseDirection;
+        auto t1 = (max - ray.origin)*ray.inverseDirection;
+        auto tmin = t0.min(t1);
+        auto tmax = t0.max(t1);
+        auto maxTMin = std::max(std::max(std::max(tmin.x, tmin.y), tmin.z), ray.tmin);
+        auto minTMax = std::min(std::min(std::min(tmax.x, tmax.y), tmax.z), ray.tmax);
+
+        bool hasIntersection = maxTMin <= minTMax;
+        if(!hasIntersection)
+            return std::nullopt;
+
+        return std::min(maxTMin, minTMax);
     }
 
     Vector3 min, max;

@@ -93,6 +93,11 @@ struct alignas(16) Vector3
         return *this / length();
     }
 
+    Vector3 abs() const
+    {
+        return Vector3(::abs(x), ::abs(y), ::abs(z));
+    }
+
     Vector3 safeNormalized() const
     {
         auto l = length();

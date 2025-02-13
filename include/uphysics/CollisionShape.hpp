@@ -99,6 +99,8 @@ public:
         localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
     }
 
+    virtual std::optional<ShapeRayCastingResult> rayCast(const Ray &ray) override;
+
     virtual Matrix3x3 computeInertiaTensorWithMass(float mass)
     {
         auto w = halfExtent.x*2;
@@ -140,6 +142,8 @@ public:
         localBoundingBox = AABox3(Vector3(-radius,-radius,-radius), Vector3(radius, radius, radius));
         localBoundingBoxWithMargin = localBoundingBox.expandedWithMargin(margin);
     }
+
+    virtual std::optional<ShapeRayCastingResult> rayCast(const Ray &ray) override;
 
     virtual Vector3 localSupportFunction(const Vector3 &D) const override
     {
@@ -203,6 +207,8 @@ class CompoundCollisionShape : public CollisionShape
 {
 public:
     void addElement(const RigidTransform &transform, CollisionShapePtr shape);
+
+    virtual std::optional<ShapeRayCastingResult> rayCast(const Ray &ray) override;
 
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsAt(const RigidTransform &firstTransform, const CollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;
     virtual std::vector<ContactPointPtr> detectAndComputeCollisionContactPointsWithConvexShapeAt(const RigidTransform &firstTransform, const ConvexCollisionShapePtr &secondShape, const RigidTransform &secondTransform, const Vector3 &separatingAxisHint) override;

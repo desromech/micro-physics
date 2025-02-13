@@ -107,4 +107,19 @@ Frustum Frustum::transformedWith(const Matrix4x4 &transform)
     return transformed;
 }
 
+Frustum Frustum::transformedWith(const RigidTransform &transform)
+{
+    Frustum transformed;
+    transformed.leftBottomNear  = transform.transformPosition(leftBottomNear);
+	transformed.rightBottomNear = transform.transformPosition(rightBottomNear);
+	transformed.leftTopNear     = transform.transformPosition(leftTopNear);
+	transformed.rightTopNear    = transform.transformPosition(rightTopNear);
+	transformed.leftBottomFar   = transform.transformPosition(leftBottomFar);
+	transformed.rightBottomFar  = transform.transformPosition(rightBottomFar);
+	transformed.leftTopFar      = transform.transformPosition(leftTopFar);
+	transformed.rightTopFar     = transform.transformPosition(rightTopFar);
+    transformed.computePlanes();
+    transformed.computeBoundingBox();
+    return transformed;
+}
 } // End of namespace UPhysics

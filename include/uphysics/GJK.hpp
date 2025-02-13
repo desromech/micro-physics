@@ -62,7 +62,7 @@ public:
         {
         case 0:
             hasComputedClosest = true;
-            closestPointToOrigin = Vector3(0.00);
+            closestPointToOrigin = Vector3(0, 0, 0);
             hasComputedClosest = true;
         case 1:
             closestPointToOrigin = points[0];
@@ -397,7 +397,7 @@ public:
 
     bool containsOrigin()
     {
-        return computeClosesPointToOrigin().closeTo(Vector3(0, 0, 0));
+        return pointCount > 0 && computeClosesPointToOrigin().closeTo(Vector3(0, 0, 0));
     }
 
     bool containsPoint(const Vector3 &pointToTest)
@@ -649,7 +649,6 @@ std::optional<GJKRayCastResult> gjkRayCast(const Ray &ray, const SupportFunction
 	auto n = Vector3::zeros();
 
 	// Code for testing the convex cast.
-
 	Vector3 v = x - supportFunction(-r);
 	auto simplex = GJKVoronoiSimplexSolver();
 	auto remainingIterations = MaxNumberOfIterations;
@@ -696,6 +695,7 @@ std::optional<GJKRayCastResult> gjkRayCast(const Ray &ray, const SupportFunction
         else
         {
             v = simplex.computeClosesPointToOrigin();
+            simplex.reduce();
             --remainingIterations;
         }
     }
