@@ -328,7 +328,7 @@ void PhysicsWorld::solveCollisionContactConstraint(const ContactPointPtr &contac
 
 void PhysicsWorld::sendToSleepRestingObjects(float deltaTimestep)
 {
-    static const float tau = 0.4;
+    static const float tau = 0.15;
     auto weight = exp(-tau*deltaTimestep)*tau;
     for(auto &rigidBody : awakeRigidBodies)
         rigidBody->checkTimeToSleep(weight);

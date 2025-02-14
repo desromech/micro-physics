@@ -8,7 +8,7 @@ namespace UPhysics
 class RigidBody : public CollisionObject
 {
 public:
-    static constexpr float SleepingMovementThreshold = 0.01;
+    static constexpr float SleepingMovementThreshold = 0.02;
     static constexpr float WakeUpMovementDeltaTreshold = 0.001;
 
     RigidBody();

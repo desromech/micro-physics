@@ -39,7 +39,7 @@ public:
 
         for(size_t i = 0; i < collisionObjects.size(); ++i)
         {
-            if(!aPredicate(collisionObjects))
+            if(!aPredicate(collisionObjects[i]))
                 continue;
 
             auto result = collisionObjects[i]->rayCast(ray);
