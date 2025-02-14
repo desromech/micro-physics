@@ -18,8 +18,9 @@ void RigidBody::checkTimeToSleep(float weight)
         return;
     
     auto movementAmount = computeMovementAmount();
+    //auto oldAverageMovementAmount = averageMovementAmount;
     averageMovementAmount = mix(averageMovementAmount, movementAmount, weight);
-    printf("weight %f movement %f -> averageMovementAmount %f\n", weight, movementAmount, averageMovementAmount);
+    //printf("weight %f movement %f :: averageMovementAmount %f -> %f\n", weight, movementAmount, oldAverageMovementAmount, averageMovementAmount);
 
     if(averageMovementAmount <= SleepingMovementThreshold)
         setSleepingStateFactors();

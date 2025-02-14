@@ -23,7 +23,7 @@ void PhysicsWorld::evaluateForceGeneratorWithDeltaTime(float deltaTimestep)
 }
 void PhysicsWorld::integrateMovementWithDeltaTime(float deltaTimestep)
 {
-    printf("Integrate %zu awake rigid bodies.\n", awakeRigidBodies.size());
+    //printf("Integrate %zu awake rigid bodies.\n", awakeRigidBodies.size());
 
     // Integrate
     for (auto &object : awakeRigidBodies)
