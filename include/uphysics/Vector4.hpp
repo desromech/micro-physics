@@ -18,6 +18,11 @@ struct alignas(16) Vector4
     Vector4(float s)
         : x(s), y(s), z(s), w(s) {}
 
+    static Vector4 zeros()
+    {
+        return Vector4(0, 0, 0, 0);
+    }
+    
     Vector4 min(const Vector4 &o) const
     {
         return Vector4(
