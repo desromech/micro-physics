@@ -14,6 +14,11 @@ struct alignas(8) Vector2
 
     float x, y;
 
+    static Vector2 zeros()
+    {
+        return Vector2(0.0f, 0.0f);
+    }
+
     float dot(const Vector2 &o) const
     {
         return x*o.x + y*o.y;
@@ -22,6 +27,11 @@ struct alignas(8) Vector2
     Vector2 reciprocal() const
     {
         return Vector2(1.0f/x, 1.0f/y);
+    }
+
+    Vector2 operator-() const
+    {
+        return Vector2{-x, -y};
     }
 
     Vector2 operator+(const Vector2 &o) const
