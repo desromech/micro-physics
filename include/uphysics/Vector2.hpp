@@ -59,6 +59,11 @@ struct alignas(8) Vector2
         return *this = *this + o;
     }
 
+    Vector2 operator-=(const Vector2 &o)
+    {
+        return *this = *this - o;
+    }
+
 };
 
 } // End of namespace UPhysics
