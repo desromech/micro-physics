@@ -40,6 +40,7 @@ set(LIBRARY_OUTPUT_PATH "${MicroPhysics_BINARY_DIR}/dist")
 include_directories(
 .
 "${PROJECT_SOURCE_DIR}/include"
+"${PROJECT_SOURCE_DIR}/include/uphysics"
 )
 
 add_subdirectory(src)
