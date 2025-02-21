@@ -1,5 +1,5 @@
-#ifndef USGAR_PLANE_HPP
-#define USGAR_PLANE_HPP
+#ifndef UPhysics_PLANE_HPP
+#define UPhysics_PLANE_HPP
 
 #include "Vector3.hpp"
 #include "Vector4.hpp"
@@ -51,5 +51,5 @@ struct DPlane
 
 	double nx, ny, nz, dn;
 };
-} // End of namespace Usgar
-#endif //USGAR_PLANE_HPP
+} // End of namespace UPhysics
+#endif //UPHYSICS_PLANE_HPP

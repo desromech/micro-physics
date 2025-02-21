@@ -178,6 +178,6 @@ namespace UPhysics
         uint32_t epoch = 0;
     };
 
-} // End of namespace Usgar
+} // End of namespace UPhysics
 
-#endif // USGAR_CONTACT_POINTS_HPP
+#endif // UPHYSICS_CONTACT_POINTS_HPP

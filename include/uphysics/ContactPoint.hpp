@@ -1,5 +1,5 @@
-#ifndef USGAR_CONTACT_POINTS_HPP
-#define USGAR_CONTACT_POINTS_HPP
+#ifndef UPHYSICS_CONTACT_POINTS_HPP
+#define UPHYSICS_CONTACT_POINTS_HPP
 
 #include "Vector3.hpp"
 #include "Matrix3x3.hpp"
@@ -46,6 +46,6 @@ namespace UPhysics
         Matrix3x3 computeContactSpaceMatrix() const;
         ContactPointPtr flipped() const;
     };
-} // End of namespace Usgar
+} // End of namespace UPhysics
 
-#endif // USGAR_CONTACT_POINTS_HPP
+#endif // UPHYSICS_CONTACT_POINTS_HPP
