@@ -46,6 +46,6 @@ namespace UPhysics
         Matrix3x3 computeContactSpaceMatrix() const;
         ContactPointPtr flipped() const;
     };
-} // End of namespace Usgar
+} // End of namespace HacRise
 
 #endif // USGAR_CONTACT_POINTS_HPP

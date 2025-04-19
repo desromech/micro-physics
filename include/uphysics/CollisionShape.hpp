@@ -193,7 +193,8 @@ public:
 class HeightfieldCollisionShape : public CollisionShape
 {
 public:
-
+    uint32_t rows, columns;
+    std::vector<uint16_t> quantizedHeights;
 };
 
 class CompoundShapeElement

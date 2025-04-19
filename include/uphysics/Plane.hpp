@@ -51,5 +51,5 @@ struct DPlane
 
 	double nx, ny, nz, dn;
 };
-} // End of namespace Usgar
+} // End of namespace HacRise
 #endif //USGAR_PLANE_HPP
